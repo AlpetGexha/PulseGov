@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="PulseGov - Empowering citizens to shape public services through continuous feedback loops and civic design collaboration.">
 
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
@@ -30,7 +31,7 @@
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>{{ config('app.name', 'PulseGov') }}</title>
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">

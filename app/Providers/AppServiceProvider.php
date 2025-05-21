@@ -32,7 +32,7 @@ final class AppServiceProvider extends ServiceProvider
     private function configurateModels(): void
     {
         Model::automaticallyEagerLoadRelationships();
-        // Model::unguard();
+        Model::unguard();
         Model::shouldBeStrict(! app()->isProduction());
         Model::preventLazyLoading(! app()->isProduction());
     }
