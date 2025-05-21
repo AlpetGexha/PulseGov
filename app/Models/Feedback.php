@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Enum\FeedbackSentiment;
-use App\Enum\FeedbackStatus;
+use App\Enum\FeedbackStatus as FeedbackStatusEnum;
 use App\Enum\FeedbackType;
 use App\Enum\UrgencyLevel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,7 +47,7 @@ class Feedback extends Model
             'id' => 'integer',
             'user_id' => 'integer',
             'sentiment' => FeedbackSentiment::class,
-            'status' => FeedbackStatus::class,
+            'status' => FeedbackStatusEnum::class,
             'feedback_type' => FeedbackType::class,
             'urgency_level' => UrgencyLevel::class,
         ];
