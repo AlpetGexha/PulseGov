@@ -16,11 +16,14 @@ class AIModelMetrics extends Model
      * @var array
      */
     protected $fillable = [
-        'ai_analysis_id',
-        'accuracy',
-        'processing_time',
-        'status',
-        'a_i_analysis_id',
+        'date',
+        'model_name',
+        'avg_processing_time',
+        'analyses_count',
+        'coverage_percentage',
+        'accuracy_score',
+        'cost',
+        'tokens_used',
     ];
 
     /**

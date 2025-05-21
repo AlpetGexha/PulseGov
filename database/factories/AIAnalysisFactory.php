@@ -24,8 +24,10 @@ class AIAnalysisFactory extends Factory
     {
         return [
             'feedback_id' => Feedback::factory(),
-            'sentiment' => fake()->randomElement(FeedbackSentiment::values()),
-            'suggested_tags' => fake()->text(),
+            'sentiment' => fake()->randomElement(FeedbackSentiment::cases()),
+            'suggested_tags' => json_encode(fake()->words(3)),
+            'summary' => fake()->sentence(),
+            'department_suggestion' => fake()->randomElement(['Parks and Recreation', 'Public Works', 'Transportation', 'Health Services', 'Education']),
             'analysis_date' => fake()->dateTime(),
         ];
     }

@@ -5,7 +5,7 @@ import { useAppearance } from '@/hooks/use-appearance';
 import { Button } from '@/components/ui/button';
 import { Sun, Moon, Laptop } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { 
+import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -14,13 +14,13 @@ import {
 
 export default function Welcome() {
     const { auth } = usePage<SharedData>().props;
-    
+
     // Use the built-in appearance hook from Laravel
     const { appearance, setAppearance } = useAppearance();
-    
+
     // Handle client-side mounting to avoid hydration mismatch
     const [mounted, setMounted] = useState(false);
-    
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -28,7 +28,7 @@ export default function Welcome() {
     // Safely render the theme icon based on current theme
     const renderThemeIcon = () => {
         if (!mounted) return null;
-        
+
         if (appearance === 'light') {
             return <Sun className="h-5 w-5 text-[#2E79B5]" />;
         } else if (appearance === 'dark') {
@@ -49,20 +49,20 @@ export default function Welcome() {
                 <header className="w-full border-b border-neutral-200 dark:border-neutral-800">
                     <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                         <Link href="/" className="flex items-center">
-                            <img 
-                                src="/logo/logo.png" 
-                                alt="PulseGov" 
+                            <img
+                                src="/logo/logo.png"
+                                alt="PulseGov"
                                 className="h-10 w-auto"
                             />
                         </Link>
-                        
+
                         <nav className="flex items-center gap-4">
                             <div className="relative">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <Button 
-                                            variant="ghost" 
-                                            size="icon" 
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
                                             className="rounded-full"
                                             aria-label="Toggle theme"
                                         >
@@ -85,7 +85,7 @@ export default function Welcome() {
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
-                            
+
                             {auth.user ? (
                                 <Link
                                     href={route('dashboard')}
@@ -112,7 +112,7 @@ export default function Welcome() {
                         </nav>
                     </div>
                 </header>
-                
+
                 {/* Hero Section */}
                 <section className="py-12 sm:py-16 lg:py-20">
                     <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
@@ -226,9 +226,9 @@ export default function Welcome() {
                     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                             <Link href="/" className="flex items-center">
-                                <img 
-                                    src="/logo/logo.png" 
-                                    alt="PulseGov" 
+                                <img
+                                    src="/logo/logo.png"
+                                    alt="PulseGov"
                                     className="h-10 w-auto"
                                 />
                             </Link>
@@ -236,9 +236,9 @@ export default function Welcome() {
                                 <div className="relative">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button 
-                                                variant="ghost" 
-                                                size="icon" 
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
                                                 className="rounded-full"
                                                 aria-label="Toggle theme"
                                             >

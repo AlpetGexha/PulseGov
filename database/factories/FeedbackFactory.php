@@ -27,17 +27,34 @@ class FeedbackFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'service' => fake()->regexify('[A-Za-z0-9]{255}'),
-            'message' => fake()->text(),
+            'title' => fake()->sentence(),
+            'body' => fake()->paragraph(),
+            'service' => fake()->word(),
+            'message' => fake()->text(), // For backward compatibility
+            'location' => fake()->city(),
             'rating' => fake()->numberBetween(1, 5),
-            'sentiment' => fake()->randomElement(FeedbackSentiment::values()),
-            'status' => fake()->randomElement(FeedbackStatus::values()),
-            'feedback_type' => fake()->randomElement(FeedbackType::values()),
-            'tracking_code' => fake()->regexify('[A-Za-z0-9]{255}'),
-            'urgency_level' => fake()->randomElement(UrgencyLevel::values()),
-            'intent' => fake()->regexify('[A-Za-z0-9]{255}'),
-            'topic_cluster' => fake()->regexify('[A-Za-z0-9]{255}'),
-            'department_assigned' => fake()->regexify('[A-Za-z0-9]{255}'),
+            'sentiment' => fake()->randomElement(FeedbackSentiment::cases()),
+            'status' => fake()->randomElement(FeedbackStatus::cases()),
+            'feedback_type' => fake()->randomElement(FeedbackType::cases()),
+            'tracking_code' => strtoupper(Str::random(8)),
+            'urgency_level' => fake()->randomElement(UrgencyLevel::cases()),
+            'intent' => fake()->word(),
+            'topic_cluster' => fake()->word(),
+            'department_assigned' => fake()->randomElement(['Parks and Recreation', 'Public Works', 'Transportation', 'Health Services', 'Education']),
         ];
+    }
+
+    /**
+     * Factory state for unprocessed feedback.
+     */
+    public function unprocessed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'sentiment' => null,
+            'urgency_level' => null,
+            'department_assigned' => null,
+            'topic_cluster' => null,
+            'intent' => null,
+        ]);
     }
 }

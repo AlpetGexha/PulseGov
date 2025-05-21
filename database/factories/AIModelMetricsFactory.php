@@ -3,8 +3,6 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use App\Models\AIAnalysis;
 use App\Models\AIModelMetrics;
 
 class AIModelMetricsFactory extends Factory
@@ -22,11 +20,14 @@ class AIModelMetricsFactory extends Factory
     public function definition(): array
     {
         return [
-            'ai_analysis_id' => fake()->word(),
-            'accuracy' => fake()->randomFloat(0, 0, 9999999999.),
-            'processing_time' => fake()->randomFloat(0, 0, 9999999999.),
-            'status' => fake()->regexify('[A-Za-z0-9]{255}'),
-            'a_i_analysis_id' => AIAnalysis::factory(),
+            'date' => fake()->dateTimeBetween('-30 days', 'now')->format('Y-m-d'),
+            'model_name' => fake()->randomElement(['gpt-4o', 'gpt-3.5-turbo', 'claude-3-haiku']),
+            'avg_processing_time' => fake()->randomFloat(2, 0.5, 5),
+            'analyses_count' => fake()->numberBetween(10, 500),
+            'coverage_percentage' => fake()->randomFloat(2, 50, 100),
+            'accuracy_score' => fake()->randomFloat(2, 70, 99),
+            'cost' => fake()->randomFloat(4, 0.01, 10),
+            'tokens_used' => fake()->numberBetween(500, 10000),
         ];
     }
 }

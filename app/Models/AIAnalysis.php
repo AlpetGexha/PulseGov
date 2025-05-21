@@ -21,6 +21,8 @@ class AIAnalysis extends Model
         'sentiment',
         'suggested_tags',
         'analysis_date',
+        'summary',
+        'department_suggestion',
     ];
 
     /**
@@ -35,6 +37,7 @@ class AIAnalysis extends Model
             'feedback_id' => 'integer',
             'sentiment' => FeedbackSentiment::class,
             'analysis_date' => 'timestamp',
+            'suggested_tags' => 'array',
         ];
     }
 

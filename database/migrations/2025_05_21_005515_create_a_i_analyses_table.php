@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignIdFor(Feedback::class)->constrained();
             $table->string('sentiment')->default(FeedbackSentiment::NEUTRAL->value);
             $table->text('suggested_tags');
+            $table->text('summary')->nullable();
+            $table->string('department_suggestion')->nullable();
             $table->timestamp('analysis_date');
             $table->timestamps();
         });
