@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use App\Enum\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class User extends Model
+class Category extends Model
 {
     use HasFactory;
 
@@ -18,18 +17,7 @@ class User extends Model
      */
     protected $fillable = [
         'name',
-        'email',
-        'password',
-        'role',
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password',
+        'description',
     ];
 
     /**
@@ -41,17 +29,11 @@ class User extends Model
     {
         return [
             'id' => 'integer',
-            'role' => UserRole::class,
         ];
     }
 
-    public function feedback(): HasMany
+    public function feedbackCategories(): HasMany
     {
-        return $this->hasMany(Feedback::class);
-    }
-
-    public function feedbackStatuses(): HasMany
-    {
-        return $this->hasMany(FeedbackStatus::class);
+        return $this->hasMany(FeedbackCategory::class);
     }
 }

@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Http\Requests;
+
+use App\Enum\FeedbackSentiment;
+use App\Enum\FeedbackStatus;
+use App\Enum\FeedbackType;
+use App\Enum\UrgencyLevel;
+
+class FeedbackRequest extends FormRequest
+{
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'user_id' => $this->integerRule(),
+            'service' => $this->stringRule(255),
+            'message' => ['required', 'string'],
+            'rating' => $this->integerRule(false, 1, 5),
+            'sentiment' => $this->enumRule(FeedbackSentiment::class, true),
+            'status' => $this->enumRule(FeedbackStatus::class),
+            'feedback_type' => $this->enumRule(FeedbackType::class),
+            'tracking_code' => $this->stringRule(255),
+            'urgency_level' => $this->enumRule(UrgencyLevel::class, true),
+            'intent' => $this->stringRule(255, true),
+            'topic_cluster' => $this->stringRule(255, true),
+            'department_assigned' => $this->stringRule(255, true),
+        ];
+    }
+
+    /**
+     * Get custom attributes for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'user_id' => 'User',
+            'service' => 'Service',
+            'message' => 'Message',
+            'rating' => 'Rating',
+            'sentiment' => 'Sentiment',
+            'status' => 'Status',
+            'feedback_type' => 'Feedback Type',
+            'tracking_code' => 'Tracking Code',
+            'urgency_level' => 'Urgency Level',
+            'intent' => 'Intent',
+            'topic_cluster' => 'Topic Cluster',
+            'department_assigned' => 'Department Assigned',
+        ];
+    }
+}

@@ -1,0 +1,77 @@
+models:
+  User:
+    name: string
+    email: string
+    password: string
+    role: enum:admin,citizen
+    relationships:
+      hasMany: Feedback,FeedbackStatus
+
+  Feedback:
+    user_id: foreign_id
+    service: string:255
+    message: text
+    rating: integer
+    sentiment: enum:positive,negative,neutral nullable
+    status: enum:under_review,resolved,implemented
+    feedback_type: enum:suggestion,problem,praise
+    tracking_code: string:255
+    urgency_level: enum:high,medium,low nullable
+    intent: string:255 nullable
+    topic_cluster: string:255 nullable
+    department_assigned: string:255 nullable
+    relationships:
+      belongsTo: User
+      hasMany: FeedbackCategory, FeedbackStatus
+      hasOne: AIAnalysis
+
+  Category:
+    name: string
+    description: text
+    relationships:
+      hasMany: FeedbackCategory
+
+  FeedbackCategory:
+    feedback_id: foreign_id  # Relates to Feedback
+    category_id: foreign_id  # Relates to Category
+    relationships:
+      belongsTo: Feedback, Category
+
+  AIAnalysis:
+    feedback_id: foreign_id  # Relates to Feedback
+    sentiment: enum:positive,negative,neutral
+    suggested_tags: text
+    analysis_date: timestamp
+    relationships:
+      belongsTo: Feedback
+
+  AIModelMetrics:
+    ai_analysis_id: foreign_id
+    accuracy: decimal nullable
+    processing_time: decimal nullable
+    status: string:255 nullable
+    relationships:
+      belongsTo: AIAnalysis
+
+  FeedbackStatus:
+    feedback_id: foreign_id  # Relates to Feedback
+    status: enum:under_review,resolved,implemented
+    admin_id: foreign_id  # Relates to User (admin)
+    comment: text
+    changed_at: timestamp
+
+    relationships:
+      belongsTo: Feedback, User
+
+  Changelog:
+    title: string
+    description: text
+    created_at: timestamp
+
+  FeedbackVote:
+    feedback_id: foreign_id  # Relates to Feedback
+    user_id: foreign_id  # Relates to User
+    vote: enum:upvote,downvote
+    created_at: timestamp
+    relationships:
+      belongsTo: Feedback, User

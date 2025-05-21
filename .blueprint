@@ -1,0 +1,38 @@
+created:
+    - database/factories/UserFactory.php
+    - database/factories/FeedbackFactory.php
+    - database/factories/CategoryFactory.php
+    - database/factories/FeedbackCategoryFactory.php
+    - database/factories/AIAnalysisFactory.php
+    - database/factories/AIModelMetricsFactory.php
+    - database/factories/FeedbackStatusFactory.php
+    - database/factories/ChangelogFactory.php
+    - database/factories/FeedbackVoteFactory.php
+    - database/migrations/2025_05_21_005551_create_users_table.php
+    - database/migrations/2025_05_21_005552_create_feedback_table.php
+    - database/migrations/2025_05_21_005553_create_categories_table.php
+    - database/migrations/2025_05_21_005554_create_feedback_categories_table.php
+    - database/migrations/2025_05_21_005555_create_a_i_analyses_table.php
+    - database/migrations/2025_05_21_005556_create_a_i_model_metrics_table.php
+    - database/migrations/2025_05_21_005557_create_feedback_statuses_table.php
+    - database/migrations/2025_05_21_005558_create_changelogs_table.php
+    - database/migrations/2025_05_21_005559_create_feedback_votes_table.php
+    - app/Models/User.php
+    - app/Models/Feedback.php
+    - app/Models/Category.php
+    - app/Models/FeedbackCategory.php
+    - app/Models/AIAnalysis.php
+    - app/Models/AIModelMetrics.php
+    - app/Models/FeedbackStatus.php
+    - app/Models/Changelog.php
+    - app/Models/FeedbackVote.php
+models:
+    User: { name: string, email: string, password: string, role: 'enum:admin,citizen', relationships: { hasMany: 'Feedback,FeedbackStatus' } }
+    Feedback: { user_id: foreign_id, service: 'string:255', message: text, rating: integer, sentiment: 'enum:positive,negative,neutral nullable', status: 'enum:under_review,resolved,implemented', feedback_type: 'enum:suggestion,problem,praise', tracking_code: 'string:255', urgency_level: 'enum:high,medium,low nullable', intent: 'string:255 nullable', topic_cluster: 'string:255 nullable', department_assigned: 'string:255 nullable', relationships: { belongsTo: User, hasMany: 'FeedbackCategory, FeedbackStatus', hasOne: AIAnalysis } }
+    Category: { name: string, description: text, relationships: { hasMany: FeedbackCategory } }
+    FeedbackCategory: { feedback_id: foreign_id, category_id: foreign_id, relationships: { belongsTo: 'Feedback, Category' } }
+    AIAnalysis: { feedback_id: foreign_id, sentiment: 'enum:positive,negative,neutral', suggested_tags: text, analysis_date: timestamp, relationships: { belongsTo: Feedback } }
+    AIModelMetrics: { ai_analysis_id: foreign_id, accuracy: 'decimal nullable', processing_time: 'decimal nullable', status: 'string:255 nullable', relationships: { belongsTo: AIAnalysis } }
+    FeedbackStatus: { feedback_id: foreign_id, status: 'enum:under_review,resolved,implemented', admin_id: foreign_id, comment: text, changed_at: timestamp, relationships: { belongsTo: 'Feedback, User' } }
+    Changelog: { title: string, description: text, created_at: timestamp }
+    FeedbackVote: { feedback_id: foreign_id, user_id: foreign_id, vote: 'enum:upvote,downvote', created_at: timestamp, relationships: { belongsTo: 'Feedback, User' } }

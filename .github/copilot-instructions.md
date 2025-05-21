@@ -83,11 +83,11 @@ public function handle(BookingTicketRequest $request)
 
 - Use:
   ```php
-  $table->foreignIdFor(User::class)->onDeleteCascade();
+  $table->foreignIdFor(User::class)->constrained();
   ```
   Instead of:
   ```php
-  $table->foreignId('user_id')->constrained()->onDelete('cascade');
+  $table->foreignId('user_id')->constrained();
   ```
 
 ### Enums

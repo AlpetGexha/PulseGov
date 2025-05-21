@@ -2,19 +2,20 @@
 
 namespace Database\Factories;
 
-use App\Enum\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use App\Models\User;
+use App\Models\;
+use App\Models\Feedback;
+use App\Models\FeedbackCategory;
 
-class UserFactory extends Factory
+class FeedbackCategoryFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = User::class;
+    protected $model = FeedbackCategory::class;
 
     /**
      * Define the model's default state.
@@ -22,10 +23,8 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->safeEmail(),
-            'password' => fake()->password(),
-            'role' => fake()->randomElement(UserRole::values()),
+            'feedback_id' => Feedback::factory(),
+            'category_id' => ::factory(),
         ];
     }
 }

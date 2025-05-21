@@ -1,0 +1,35 @@
+models:
+  User:
+    name: string
+    email: string
+    password: string
+    role: enum:admin,citizen
+    relationships:
+      hasMany: Feedback
+
+  Feedback:
+    user_id: foreign_id
+    message: text
+    relationships:
+      belongsTo: User
+
+controllers:
+  User:
+    index: {}
+    create: {}
+    store: {}
+    show: {}
+    edit: {}
+    update: {}
+    destroy: {}
+
+routes:
+  web:
+    User:
+      index: {}
+      create: {}
+      store: {}
+      show: {}
+      edit: {}
+      update: {}
+      destroy: {}

@@ -2,19 +2,18 @@
 
 namespace Database\Factories;
 
-use App\Enum\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use App\Models\User;
+use App\Models\Changelog;
 
-class UserFactory extends Factory
+class ChangelogFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = User::class;
+    protected $model = Changelog::class;
 
     /**
      * Define the model's default state.
@@ -22,10 +21,9 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->safeEmail(),
-            'password' => fake()->password(),
-            'role' => fake()->randomElement(UserRole::values()),
+            'title' => fake()->sentence(4),
+            'description' => fake()->text(),
+            'created_at' => fake()->dateTime(),
         ];
     }
 }

@@ -2,19 +2,21 @@
 
 namespace Database\Factories;
 
-use App\Enum\UserRole;
+use App\Enum\VoteType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use App\Models\Feedback;
+use App\Models\FeedbackVote;
 use App\Models\User;
 
-class UserFactory extends Factory
+class FeedbackVoteFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = User::class;
+    protected $model = FeedbackVote::class;
 
     /**
      * Define the model's default state.
@@ -22,10 +24,10 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->safeEmail(),
-            'password' => fake()->password(),
-            'role' => fake()->randomElement(UserRole::values()),
+            'feedback_id' => Feedback::factory(),
+            'user_id' => User::factory(),
+            'vote' => fake()->randomElement(VoteType::values()),
+            'created_at' => fake()->dateTime(),
         ];
     }
 }
