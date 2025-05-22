@@ -72,4 +72,14 @@ class Feedback extends Model
     {
         return $this->hasOne(AIAnalysis::class);
     }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(FeedbackComment::class);
+    }
+
+    public function votes(): HasMany
+    {
+        return $this->hasMany(FeedbackVote::class);
+    }
 }

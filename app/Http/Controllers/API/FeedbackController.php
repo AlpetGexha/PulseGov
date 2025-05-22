@@ -30,10 +30,9 @@ class FeedbackController extends Controller
                 ->latest()
                 ->paginate(10);
 
-            return response()->json([
-                'data' => FeedbackResource::collection($feedback),
-                'message' => 'Feedback retrieved successfully',
-            ]);
+            // Return the paginated data with the proper structure
+            return FeedbackResource::collection($feedback)
+                ->additional(['message' => 'Feedback retrieved successfully']);
         }
 
         // Admin can see all feedback with filters
@@ -58,10 +57,9 @@ class FeedbackController extends Controller
 
         $feedback = $query->latest()->paginate(15);
 
-        return response()->json([
-            'data' => FeedbackResource::collection($feedback),
-            'message' => 'Feedback retrieved successfully',
-        ]);
+        // Return paginated data with proper structure using Laravel API Resources
+        return FeedbackResource::collection($feedback)
+            ->additional(['message' => 'Feedback retrieved successfully']);
     }
 
     /**
