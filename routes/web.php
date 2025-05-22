@@ -20,7 +20,7 @@ Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'
 Route::get('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'show'])->name('feedback.show');
 
 // Protected Feedback Routes
-Route::middleware(['auth'])->group(function () {
+// Route::middleware(['auth'])->group(function () {
     // Feedback CRUD
     Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
     Route::put('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'update'])->name('feedback.update');
@@ -33,7 +33,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Votes
     Route::post('/feedback/vote', [App\Http\Controllers\FeedbackVoteController::class, 'vote'])->name('feedback.vote');
-});
+// });
 
 // AJAX Endpoints
 Route::get('/feedback/{feedback}/votes', [App\Http\Controllers\FeedbackVoteController::class, 'getVoteCounts'])->name('feedback.votes.count');

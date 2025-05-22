@@ -15,7 +15,7 @@ class FeedbackVoteRequest extends FormRequest
     {
         return [
             'feedback_id' => ['required', 'exists:feedback,id'],
-            'vote' => $this->enumRule(VoteType::class),
+             //   'vote' => ['required', 'string', 'in:' . implode(',', array_column(VoteType::cases(), 'value'))],
         ];
     }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { Label } from "@/components/ui/label"
 import {
     ThumbsUp,
     ThumbsDown,
@@ -376,13 +377,12 @@ export default function FeedbackForum({ feedbacks, auth, categories }) {
                             <Link
                                 key={i}
                                 href={link.url || '#'}
-                                className={`px-4 py-2 text-sm ${
-                                    link.active
+                                className={`px-4 py-2 text-sm ${link.active
                                         ? 'bg-blue-600 text-white'
                                         : link.url
                                             ? 'bg-white text-blue-600 hover:bg-blue-100'
                                             : 'cursor-default text-gray-400'
-                                } rounded border`}
+                                    } rounded border`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />
                         ))}
@@ -479,6 +479,13 @@ export default function FeedbackForum({ feedbacks, auth, categories }) {
                                 onChange={(e) => setData('service', e.target.value)}
                                 placeholder="Which public service is this about?"
                             />
+                        </div>
+
+                        <div>
+                            <div className="grid w-full max-w-sm items-center gap-1.5">
+                                <Label htmlFor="picture">Picture</Label>
+                                <Input id="picture" type="file" />
+                            </div>
                         </div>
 
                         <DialogFooter className="gap-2 sm:gap-0">
