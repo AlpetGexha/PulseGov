@@ -25,8 +25,8 @@ return new class () extends Migration {
             $table->string('service', 255)->nullable();
             // $table->integer('rating');
             $table->string('sentiment')->nullable()->default(null);
-            $table->string('status')->default(FeedbackStatus::UNDER_REVIEW->value);
-            $table->string('feedback_type')->default(FeedbackType::SUGGESTION->value);
+            $table->string('status')->nullable()->default(FeedbackStatus::UNDER_REVIEW->value);
+            $table->string('feedback_type')->nullable()->default(FeedbackType::SUGGESTION->value);
             $table->string('urgency_level')->nullable()->default(null);
             $table->string('intent', 255)->nullable();
             $table->string('topic_cluster', 255)->nullable();

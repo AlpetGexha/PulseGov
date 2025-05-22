@@ -17,18 +17,19 @@ class FeedbackRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => $this->integerRule(),
-            'service' => $this->stringRule(255),
-            'message' => ['required', 'string'],
-            'rating' => $this->integerRule(false, 1, 5),
-            'sentiment' => $this->enumRule(FeedbackSentiment::class, true),
-            'status' => $this->enumRule(FeedbackStatus::class),
-            'feedback_type' => $this->enumRule(FeedbackType::class),
-            'tracking_code' => $this->stringRule(255),
-            'urgency_level' => $this->enumRule(UrgencyLevel::class, true),
-            'intent' => $this->stringRule(255, true),
-            'topic_cluster' => $this->stringRule(255, true),
-            'department_assigned' => $this->stringRule(255, true),
+            // 'user_id' => $this->integerRule(),
+            'title' => ['required', 'string', 'max:255'],
+            'body' => ['required', 'string', 'min:10'],
+            'location' => ['string','nullable'],
+            // 'service' => $this->stringRule(255, true),
+            // 'sentiment' => $this->enumRule(FeedbackSentiment::class, true),
+            // 'status' => $this->enumRule(FeedbackStatus::class),
+            // 'feedback_type' => $this->enumRule(FeedbackType::class),
+            // 'tracking_code' => $this->stringRule(255),
+            // 'urgency_level' => $this->enumRule(UrgencyLevel::class, true),
+            // 'intent' => $this->stringRule(255, true),
+            // 'topic_cluster' => $this->stringRule(255, true),
+            // 'department_assigned' => $this->stringRule(255, true),
         ];
     }
 
@@ -41,9 +42,9 @@ class FeedbackRequest extends FormRequest
     {
         return [
             'user_id' => 'User',
+            'title' => 'Title',
+            'body' => 'Details',
             'service' => 'Service',
-            'message' => 'Message',
-            'rating' => 'Rating',
             'sentiment' => 'Sentiment',
             'status' => 'Status',
             'feedback_type' => 'Feedback Type',

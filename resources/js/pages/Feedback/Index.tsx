@@ -55,16 +55,16 @@ export default function FeedbackForum({ feedbacks, auth, categories }) {
     const [draftFeedback, setDraftFeedback] = useState({
         title: '',
         body: '',
-        category: '',
-        type: 'suggestion',
+        service: '',
+        feedback_type: 'suggestion',
     });
 
     // Form handling
     const { data, setData, post, processing, reset, errors } = useForm({
         title: '',
         body: '',
-        category: '',
-        type: 'suggestion',
+        service: '',
+        feedback_type: 'suggestion',
     });
 
     // Load draft from localStorage on component mount
@@ -103,8 +103,10 @@ export default function FeedbackForum({ feedbacks, auth, categories }) {
                 localStorage.removeItem('feedbackDraft');
                 toast.success('Feedback submitted successfully!');
             },
-            onError: () => {
-                toast.error('Failed to submit feedback.');
+            onError: (errors) => {
+                console.error(errors);
+                const errorMessage = Object.values(errors).flat().join(', ');
+                toast.error(`Failed to submit feedback: ${errorMessage}`);
             }
         });
     };
@@ -400,12 +402,12 @@ export default function FeedbackForum({ feedbacks, auth, categories }) {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="space-y-2">
-                            <label htmlFor="type" className="text-sm font-medium">
+                            <label htmlFor="feedback_type" className="text-sm font-medium">
                                 Feedback Type
                             </label>
                             <Select
-                                value={data.type}
-                                onValueChange={(value) => setData('type', value)}
+                                value={data.feedback_type}
+                                onValueChange={(value) => setData('feedback_type', value)}
                             >
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select feedback type" />
@@ -437,7 +439,7 @@ export default function FeedbackForum({ feedbacks, auth, categories }) {
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
-                            {errors.type && <p className="text-sm text-red-600">{errors.type}</p>}
+                            {errors.feedback_type && <p className="text-sm text-red-600">{errors.feedback_type}</p>}
                         </div>
 
                         <div className="space-y-2">

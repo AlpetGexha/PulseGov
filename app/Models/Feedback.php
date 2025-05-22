@@ -23,9 +23,10 @@ class Feedback extends Model
      */
     protected $fillable = [
         'user_id',
+        'title',
+        'body',
+        'location',
         'service',
-        'message',
-        'rating',
         'sentiment',
         'status',
         'feedback_type',
@@ -48,7 +49,7 @@ class Feedback extends Model
             'user_id' => 'integer',
             'sentiment' => FeedbackSentiment::class,
             'status' => FeedbackStatusEnum::class,
-            'feedback_type' => FeedbackType::class,
+            // 'feedback_type' => FeedbackType::class,
             'urgency_level' => UrgencyLevel::class,
         ];
     }
