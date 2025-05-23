@@ -226,14 +226,17 @@ composer run dev
 ## 📸 Screenshots
 
 ### System Architecture
+
 ![Feedback Loop Algorithm](screenshots/feedback%20loop%20alg.png)
 
 ### UI Overview
+
 ![Full Light Mode - Feedback](screenshots/feedback-full.jpg)
 ![Full Light Mode](screenshots/full-light.png)
 ![Full Dark Mode](screenshots/full-dark.png)
 
 ### Main Features
+
 ![Dashboard](screenshots/dashboard.png)
 ![Forum Interface](screenshots/forumi.png)
 ![Admin Chat](screenshots/admin-chat.png)
