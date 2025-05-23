@@ -1,4 +1,3 @@
-
 # 🏛️ PulseGov: Smart Civic Feedback & Engagement Platform
 
 ![PulseGov](screenshots/feedback-full.jpg)
@@ -6,6 +5,19 @@
 **PulseGov** is an AI-powered civic tech platform designed to streamline public feedback, intelligently prioritize municipal issues, and engage only the relevant communities through hyperlocal decision-making and dynamic mapping. Built for transparency, efficiency, and smarter governance.
 
 ## 📌 Table of Contents
+
+- [🚀 Features](#-features)
+- [🧠 Architecture](#-architecture)
+  - [How this works](#how-this-works)
+- [🗃️ Data Models](#-data-models)
+- [🔄 Civic Referendum System](#-civic-referendum-system)
+- [🧠 AI Capabilities](#-ai-capabilities)
+- [🗺️ Feedback Map & Population Scaling](#-feedback-map--population-scaling)
+- [🧩 Departmental Dataset](#-departmental-dataset)
+- [⏱️ Rate Limiting & Abuse Prevention](#️-rate-limiting--abuse-prevention)
+- [🛠️ Installation](#️-installation)
+- [⚙️ Tech Stack](#️-tech-stack)
+- [📸 Screenshots](#-screenshots)
 
 ## 🚀 Features
 
@@ -211,20 +223,18 @@ composer run dev
 - **Tailwind CSS** (Styling)
 - **OpenAI** (AI for language/sentiment/keywords)
 
-### Screenshots
+## 📸 Screenshots
 
-![Feedback](screenshots/feedback%20loop%20alg.png)
+### System Architecture
+![Feedback Loop Algorithm](screenshots/feedback%20loop%20alg.png)
 
-![Full Light Mode](screenshots/feedback-full.jpg)
-
+### UI Overview
+![Full Light Mode - Feedback](screenshots/feedback-full.jpg)
 ![Full Light Mode](screenshots/full-light.png)
-
 ![Full Dark Mode](screenshots/full-dark.png)
 
+### Main Features
 ![Dashboard](screenshots/dashboard.png)
-
-![Forumi](screenshots/forumi.png)
-
+![Forum Interface](screenshots/forumi.png)
 ![Admin Chat](screenshots/admin-chat.png)
-
-![Maps](screenshots/Maps.jpg)
+![Interactive Maps](screenshots/Maps.jpg)
