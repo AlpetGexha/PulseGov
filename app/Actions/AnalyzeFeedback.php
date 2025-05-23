@@ -6,6 +6,7 @@ use App\Enum\FeedbackSentiment;
 use App\Enum\FeedbackType;
 use App\Enum\UrgencyLevel;
 use App\Models\AIAnalysis;
+use App\Models\Departament;
 use App\Models\Feedback;
 use Illuminate\Support\Facades\Log;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -64,12 +65,18 @@ class AnalyzeFeedback
      */
     private function analyzeWithAI(string $message): array
     {
+
+        $feedback = Feedback::all()->toBase();
+
+        $dataset = Departament::all()->toBase();
+        //
+
         $response = OpenAI::chat()->create([
             'model' => 'gpt-4o',
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => 'You are an AI assistant for a government feedback system. Your task is to analyze citizen feedback and provide useful insights.'
+                    'content' => "You are an AI assistant for a government feedback system {$feedback}. Your task is to analyze citizen feedback and provide useful insights",
                 ],
                 [
                     'role' => 'user',
