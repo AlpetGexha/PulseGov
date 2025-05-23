@@ -20,7 +20,7 @@ class FeedbackCommentController extends Controller
         $comment = FeedbackComment::create([
             'feedback_id' => $feedback->id,
             'user_id' => Auth::id(),
-            'parent_id' => $request->parent_id,
+            'parent_id' => $request?->parent_id,
             'content' => $request->content,
         ]);
 

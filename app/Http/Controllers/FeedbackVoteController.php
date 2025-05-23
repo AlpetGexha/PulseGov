@@ -15,36 +15,53 @@ class FeedbackVoteController extends Controller
     /**
      * Store or update a vote for feedback.
      */
-    public function vote(FeedbackVoteRequest $request): RedirectResponse
+    public function vote(FeedbackVoteRequest $request): JsonResponse
     {
-        $feedback = Feedback::findOrFail($request->feedback_id);
-        $userId = Auth::id();
+        try {
+            $validated = $request->validated();
+            $feedback = Feedback::findOrFail($validated['feedback_id']);
+            $userId = Auth::id();
 
-        // Find existing vote
-        $vote = FeedbackVote::where('feedback_id', $feedback->id)
-            ->where('user_id', $userId)
-            ->first();
+            // Find existing vote
+            $vote = FeedbackVote::where('feedback_id', $feedback->id)
+                ->where('user_id', $userId)
+                ->first();
 
-        if ($vote) {
-            // If same vote type, remove it (toggle off)
-            if ($vote->vote->value === $request->vote) {
-                $vote->delete();
-                return back()->with('success', 'Vote removed.');
+            if ($vote) {
+                // If same vote type, remove it (toggle off)
+                if ($vote->vote->value === $validated['vote']) {
+                    $vote->delete();
+                    return response()->json([
+                        'message' => 'Vote removed successfully',
+                        'voteStatus' => null
+                    ]);
+                }
+
+                // If different vote type, update it
+                $vote->update(['vote' => $validated['vote']]);
+                return response()->json([
+                    'message' => 'Vote updated successfully',
+                    'voteStatus' => $validated['vote']
+                ]);
             }
 
-            // If different vote type, update it
-            $vote->update(['vote' => $request->vote]);
-            return back()->with('success', 'Vote updated.');
+            // Create new vote
+            FeedbackVote::create([
+                'feedback_id' => $feedback->id,
+                'user_id' => $userId,
+                'vote' => $validated['vote'],
+            ]);
+
+            return response()->json([
+                'message' => 'Vote recorded successfully',
+                'voteStatus' => $validated['vote']
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to record vote',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Create new vote
-        FeedbackVote::create([
-            'feedback_id' => $feedback->id,
-            'user_id' => $userId,
-            'vote' => $request->vote,
-        ]);
-
-        return back()->with('success', 'Vote recorded.');
     }
 
     /**

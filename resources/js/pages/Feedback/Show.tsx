@@ -33,6 +33,12 @@ export default function FeedbackShow({ feedback, auth }) {
         parent_id: null,
     });
 
+    // Form handling for votes
+    const voteForm = useForm({
+        feedback_id: feedback.id,
+        vote: '',
+    });
+
     // Submit comment
     const handleSubmitComment = (e) => {
         e.preventDefault();
@@ -42,8 +48,8 @@ export default function FeedbackShow({ feedback, auth }) {
                 setReplyingTo(null);
                 toast.success('Comment posted successfully!');
             },
-            onError: () => {
-                toast.error('Failed to post comment.');
+            onError: (error) => {
+                toast.error('Failed to post comment.' + error.message);
             }
         });
     };
@@ -55,12 +61,20 @@ export default function FeedbackShow({ feedback, auth }) {
             return;
         }
 
-        post(route('feedback.vote', { id: feedback.id, type: voteType }), {
+        voteForm.setData({
+            feedback_id: feedback.id,
+            vote: voteType
+        });
+
+        voteForm.post(route('feedback.vote'), {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Vote recorded!');
+                toast.success('Vote recorded successfully');
+                // Refresh the page to update vote counts
+                window.location.reload();
             },
-            onError: () => {
+            onError: (errors) => {
+                console.error(errors);
                 toast.error('Failed to record vote');
             }
         });
@@ -97,8 +111,8 @@ export default function FeedbackShow({ feedback, auth }) {
 
     // Calculate total votes
     const getTotalVotes = () => {
-        const upvotes = feedback.votes?.filter(v => v.vote_type === 'upvote').length || 0;
-        const downvotes = feedback.votes?.filter(v => v.vote_type === 'downvote').length || 0;
+        const upvotes = feedback.votes?.filter(v => v.vote === 'upvote').length || 0;
+        const downvotes = feedback.votes?.filter(v => v.vote === 'downvote').length || 0;
         return upvotes - downvotes;
     };
 

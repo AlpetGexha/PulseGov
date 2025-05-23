@@ -12,10 +12,10 @@ class FeedbackCommentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'feedback_id' => ['required', 'exists:feedback,id'],
+            // 'feedback_id' => ['required', 'exists:feedback,id'],
             'parent_id' => ['nullable', 'exists:feedback_comments,id'],
             'content' => ['required', 'string', 'min:2', 'max:5000'],
-            'is_pinned' => ['boolean'],
+            // 'is_pinned' => ['boolean'],
         ];
     }
 
