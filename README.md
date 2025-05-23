@@ -227,7 +227,7 @@ composer run dev
 
 ### System Architecture
 
-![Feedback Loop Algorithm](screenshots/feedback%20loop%20alg.png)
+![Feedback Loop Algorithm](screenshots/loop.png)
 
 ### UI Overview
 
