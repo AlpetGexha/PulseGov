@@ -7,18 +7,6 @@
 
 ## 📌 Table of Contents
 
-- [Features](#features)
-- [Architecture](#architecture)
-- [Data Models](#data-models)
-- [AI Capabilities](#ai-capabilities)
-- [Civic Referendum System](#civic-referendum-system)
-- [Feedback Lifecycle](#feedback-lifecycle)
-- [Departmental Dataset](#departmental-dataset)
-- [Rate Limiting & Abuse Prevention](#rate-limiting--abuse-prevention)
-- [Installation](#installation)
-- [Tech Stack](#tech-stack)
-- [License](#license)
-
 ## 🚀 Features
 
 - **AI-Powered Feedback Prioritization** based on season, location, and urgency
@@ -223,6 +211,20 @@ composer run dev
 - **Tailwind CSS** (Styling)
 - **OpenAI** (AI for language/sentiment/keywords)
 
-
 ### Screenshots
-![]
+
+![Feedback](screenshots/feedback%20loop%20alg.png)
+
+![Full Light Mode](screenshots/feedback-full.jpg)
+
+![Full Light Mode](screenshots/full-light.png)
+
+![Full Dark Mode](screenshots/full-dark.png)
+
+![Dashboard](screenshots/dashboard.png)
+
+![Forumi](screenshots/forumi.png)
+
+![Admin Chat](screenshots/admin-chat.png)
+
+![Maps](screenshots/Maps.jpg)
