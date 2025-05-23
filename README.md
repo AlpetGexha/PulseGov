@@ -1,6 +1,6 @@
 # 🏛️ PulseGov: Smart Civic Feedback & Engagement Platform
 
-![PulseGov](screenshots/feedback-full.jpg)
+![PulseGov](screenshots/header-full.jpg)
 
 **PulseGov** is an AI-powered civic tech platform designed to streamline public feedback, intelligently prioritize municipal issues, and engage only the relevant communities through hyperlocal decision-making and dynamic mapping. Built for transparency, efficiency, and smarter governance.
 
