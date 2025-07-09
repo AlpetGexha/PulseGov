@@ -271,56 +271,49 @@ export default function FeedbackShow({ feedback, auth }) {
 
     return (
         <AppLayout>
-            <Head title={`${feedback.title} | PulseGov Feedback`} />
-
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+            <Head title={`${feedback.title} | PulseGov Feedback`} />            <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 mt-8">
                 {/* Header Section */}
-                <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 dark:bg-slate-900/80 dark:border-slate-700 sticky top-0 z-10">
-                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                        <div className="flex items-center justify-between">
-                            <Link
-                                href={route('feedback.index')}
-                                className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-[#2E79B5] transition-colors"
-                            >
-                                <ChevronLeft className="mr-2 h-4 w-4" />
-                                Back to Feedback
-                            </Link>
-
-                            <div className="flex items-center space-x-3">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="hidden sm:flex items-center gap-2"
-                                    onClick={shareFeedback}
-                                >
-                                    <Share2 className="h-4 w-4" />
-                                    Share
-                                </Button>
-
-                                <div className="text-sm text-gray-500">
-                                    ID: <span className="font-mono">{feedback.tracking_code}</span>
-                                </div>
-                            </div>
+                <div className="flex items-center justify-between">
+                    <Link
+                        href={route('feedback.index')}
+                        className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-[#2E79B5] transition-colors"
+                    >
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        Back to Feedback
+                    </Link>
+                    
+                    <div className="flex items-center space-x-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="hidden sm:flex items-center gap-2"
+                            onClick={shareFeedback}
+                        >
+                            <Share2 className="h-4 w-4" />
+                            Share
+                        </Button>
+                        
+                        <div className="text-sm text-gray-500">
+                            ID: <span className="font-mono">{feedback.tracking_code}</span>
                         </div>
                     </div>
                 </div>
 
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-6">
                             {/* Feedback Card */}
-                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                            <Card className="shadow-sm border">
                                 <CardHeader className="pb-4">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center space-x-3">
-                                            <div className="p-3 rounded-full bg-gradient-to-r from-[#2E79B5] to-[#1E5A8A] text-white">
+                                            <div className="p-2 rounded-full bg-[#2E79B5] text-white">
                                                 {getFeedbackTypeIcon(feedback.feedback_type)}
                                             </div>
                                             <div>
                                                 <Badge
                                                     variant="outline"
-                                                    className="mb-2 border-[#2E79B5] text-[#2E79B5] bg-blue-50"
+                                                    className="mb-2"
                                                 >
                                                     {feedback.feedback_type.charAt(0).toUpperCase() + feedback.feedback_type.slice(1)}
                                                 </Badge>
@@ -333,7 +326,7 @@ export default function FeedbackShow({ feedback, auth }) {
                                         <div className="flex items-center space-x-2">
                                             <Badge
                                                 variant="secondary"
-                                                className="bg-green-100 text-green-800 border-green-200"
+                                                className="bg-green-100 text-green-800"
                                             >
                                                 {feedback.status?.label || 'Under Review'}
                                             </Badge>
@@ -389,7 +382,7 @@ export default function FeedbackShow({ feedback, auth }) {
 
                                     {/* AI Analysis */}
                                     {feedback.ai_analysis_details?.summary && (
-                                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
                                             <div className="flex items-start gap-3">
                                                 <div className="p-2 bg-blue-500 rounded-lg">
                                                     <Lightbulb className="h-4 w-4 text-white" />
@@ -418,7 +411,7 @@ export default function FeedbackShow({ feedback, auth }) {
                             </Card>
 
                             {/* Comments Section */}
-                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                            <Card className="shadow-sm border">
                                 <CardHeader>
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
@@ -431,7 +424,7 @@ export default function FeedbackShow({ feedback, auth }) {
                                 <CardContent className="space-y-6">
                                     {/* Comment Form */}
                                     {auth.user ? (
-                                        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
                                             <div className="flex items-start gap-3">
                                                 <Avatar className="h-8 w-8">
                                                     <AvatarImage src={auth.user?.profile_photo_url} alt={auth.user?.name} />
@@ -445,7 +438,7 @@ export default function FeedbackShow({ feedback, auth }) {
                                                             value={data.content}
                                                             onChange={(e) => setData('content', e.target.value)}
                                                             placeholder="Share your thoughts on this feedback..."
-                                                            className="min-h-[100px] resize-none border-gray-300 focus:border-[#2E79B5] focus:ring-[#2E79B5]"
+                                                            className="min-h-[100px] resize-none"
                                                             rows={3}
                                                         />
                                                         {errors.content && (
@@ -466,7 +459,7 @@ export default function FeedbackShow({ feedback, auth }) {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                                        <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                             <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                                             <p className="text-gray-600 dark:text-gray-400 mb-4">
                                                 Join the conversation by logging in
@@ -504,7 +497,7 @@ export default function FeedbackShow({ feedback, auth }) {
                         {/* Sidebar */}
                         <div className="space-y-6">
                             {/* Voting Card */}
-                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                            <Card className="shadow-sm border">
                                 <CardHeader>
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         Community Support
@@ -553,7 +546,7 @@ export default function FeedbackShow({ feedback, auth }) {
                             </Card>
 
                             {/* Feedback Info */}
-                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                            <Card className="shadow-sm border">
                                 <CardHeader>
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         Feedback Details
@@ -591,7 +584,7 @@ export default function FeedbackShow({ feedback, auth }) {
                             </Card>
 
                             {/* Quick Actions */}
-                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                            <Card className="shadow-sm border">
                                 <CardHeader>
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                                         Actions
@@ -631,7 +624,6 @@ export default function FeedbackShow({ feedback, auth }) {
                         </div>
                     </div>
                 </div>
-            </div>
         </AppLayout>
     );
 }
