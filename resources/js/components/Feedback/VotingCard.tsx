@@ -27,7 +27,7 @@ interface VotingCardProps {
 
 export default function VotingCard({ feedback, auth }: VotingCardProps) {
     const [votes, setVotes] = useState<Vote[]>(feedback.votes || []);
-    
+
     // Form handling for votes
     const voteForm = useForm({
         feedback_id: feedback.id,
@@ -56,16 +56,16 @@ export default function VotingCard({ feedback, auth }: VotingCardProps) {
         }
 
         const currentVote = getUserVote();
-        
+
         // Optimistically update the UI
         setVotes(prevVotes => {
             const filteredVotes = prevVotes.filter(v => v.user_id !== auth.user!.id);
-            
+
             // If clicking the same vote type, remove it (toggle off)
             if (currentVote === voteType) {
                 return filteredVotes;
             }
-            
+
             // Add new vote
             return [
                 ...filteredVotes,
@@ -89,7 +89,7 @@ export default function VotingCard({ feedback, auth }: VotingCardProps) {
             onSuccess: (page: any) => {
                 const message = page.props.flash?.success || 'Vote recorded successfully';
                 toast.success(message);
-                
+
                 // Update votes with actual data from server if available
                 if (page.props.feedback?.votes) {
                     setVotes(page.props.feedback.votes);
@@ -98,7 +98,7 @@ export default function VotingCard({ feedback, auth }: VotingCardProps) {
             onError: (errors: any) => {
                 // Revert optimistic update on error
                 setVotes(feedback.votes || []);
-                
+
                 console.error(errors);
                 const message = errors.message || 'Failed to record vote';
                 toast.error(message);
@@ -121,8 +121,8 @@ export default function VotingCard({ feedback, auth }: VotingCardProps) {
                             size="sm"
                             onClick={() => handleVote('upvote')}
                             className={`flex items-center gap-2 transition-all ${
-                                getUserVote() === 'upvote' 
-                                    ? 'bg-green-500 hover:bg-green-600 text-white border-green-500' 
+                                getUserVote() === 'upvote'
+                                    ? 'bg-green-500 hover:bg-green-600 text-white border-green-500'
                                     : 'hover:bg-green-50 hover:text-green-600 hover:border-green-300'
                             }`}
                             disabled={!auth.user || voteForm.processing}
@@ -130,21 +130,21 @@ export default function VotingCard({ feedback, auth }: VotingCardProps) {
                             <ChevronUp className="h-4 w-4" />
                             {getUserVote() === 'upvote' ? 'Supported' : 'Support'}
                         </Button>
-                        
+
                         <div className="text-center">
                             <div className="text-2xl font-bold text-[#2E79B5]">
                                 {getTotalVotes()}
                             </div>
                             <div className="text-xs text-gray-500">votes</div>
                         </div>
-                        
+
                         <Button
                             variant={getUserVote() === 'downvote' ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => handleVote('downvote')}
                             className={`flex items-center gap-2 transition-all ${
-                                getUserVote() === 'downvote' 
-                                    ? 'bg-red-500 hover:bg-red-600 text-white border-red-500' 
+                                getUserVote() === 'downvote'
+                                    ? 'bg-red-500 hover:bg-red-600 text-white border-red-500'
                                     : 'hover:bg-red-50 hover:text-red-600 hover:border-red-300'
                             }`}
                             disabled={!auth.user || voteForm.processing}
@@ -153,7 +153,7 @@ export default function VotingCard({ feedback, auth }: VotingCardProps) {
                             {getUserVote() === 'downvote' ? 'Disagreed' : 'Disagree'}
                         </Button>
                     </div>
-                    
+
                     {!auth.user ? (
                         <p className="text-xs text-gray-500">
                             Login to vote and show your support

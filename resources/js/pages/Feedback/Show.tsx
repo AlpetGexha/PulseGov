@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
-import VotingCard from '@/components/Feedback/VotingCard';
+import VotingCard from '@/components/VotingCard';
 
 interface FeedbackShowProps {
     feedback: any;

@@ -8,6 +8,7 @@ enum UrgencyLevel: string
 {
     use EnumHelper;
 
+    case CRITICAL = 'critical';
     case HIGH = 'high';
     case MEDIUM = 'medium';
     case LOW = 'low';
@@ -20,6 +21,7 @@ enum UrgencyLevel: string
     public function label(): string
     {
         return match($this) {
+            self::CRITICAL => 'Critical',
             self::HIGH => 'High',
             self::MEDIUM => 'Medium',
             self::LOW => 'Low',
@@ -34,7 +36,8 @@ enum UrgencyLevel: string
     public function color(): string
     {
         return match($this) {
-            self::HIGH => 'red',
+            self::CRITICAL => 'red',
+            self::HIGH => 'orange',
             self::MEDIUM => 'yellow',
             self::LOW => 'green',
         };
@@ -48,9 +51,10 @@ enum UrgencyLevel: string
     public function priority(): int
     {
         return match($this) {
-            self::HIGH => 1,
-            self::MEDIUM => 2,
-            self::LOW => 3,
+            self::CRITICAL => 1,
+            self::HIGH => 2,
+            self::MEDIUM => 3,
+            self::LOW => 4,
         };
     }
 }

@@ -248,6 +248,89 @@ export default function Dashboard() {
                     })}
                 </div>
 
+                {/* Quick Actions Section */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <Link href="/analytics">
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer border-2 hover:border-[#2E79B5]/30 group">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#2E79B5] transition-colors">
+                                            AI Analytics
+                                        </h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            Smart insights & prioritization
+                                        </p>
+                                    </div>
+                                    <div className="rounded-xl bg-purple-100 p-3 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 group-hover:bg-[#2E79B5]/10 group-hover:text-[#2E79B5] transition-colors">
+                                        <BarChart3 className="h-5 w-5" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    <Link href="/feedback">
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer border-2 hover:border-[#2E79B5]/30 group">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#2E79B5] transition-colors">
+                                            View Feedback
+                                        </h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            Browse citizen submissions
+                                        </p>
+                                    </div>
+                                    <div className="rounded-xl bg-blue-100 p-3 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 group-hover:bg-[#2E79B5]/10 group-hover:text-[#2E79B5] transition-colors">
+                                        <MessageSquare className="h-5 w-5" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    <Link href="/community">
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer border-2 hover:border-[#2E79B5]/30 group">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#2E79B5] transition-colors">
+                                            Community
+                                        </h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            Engage with citizens
+                                        </p>
+                                    </div>
+                                    <div className="rounded-xl bg-green-100 p-3 text-green-600 dark:bg-green-900/30 dark:text-green-400 group-hover:bg-[#2E79B5]/10 group-hover:text-[#2E79B5] transition-colors">
+                                        <Users className="h-5 w-5" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+
+                    <Link href="/initiatives">
+                        <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer border-2 hover:border-[#2E79B5]/30 group">
+                            <CardContent className="p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-[#2E79B5] transition-colors">
+                                            Initiatives
+                                        </h3>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                            Track progress & projects
+                                        </p>
+                                    </div>
+                                    <div className="rounded-xl bg-orange-100 p-3 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 group-hover:bg-[#2E79B5]/10 group-hover:text-[#2E79B5] transition-colors">
+                                        <CheckCircle2 className="h-5 w-5" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </Link>
+                </div>
+
                 {/* Main charts section */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                     {/* Feedback over time chart */}
