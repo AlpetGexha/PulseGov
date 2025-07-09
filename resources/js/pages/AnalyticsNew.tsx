@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-import { 
-    TrendingUp, 
-    TrendingDown, 
+import {
+    TrendingUp,
+    TrendingDown,
     Brain,
     AlertTriangle,
     Users,
@@ -100,15 +100,27 @@ interface AnalyticsProps {
 }
 
 export default function Analytics({ analytics }: AnalyticsProps) {
+    const { flash } = usePage().props as any;
     const [selectedTopic, setSelectedTopic] = useState<FeedbackTopic | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isGeneratingAI, setIsGeneratingAI] = useState(false);
     const [activeTab, setActiveTab] = useState('priorities');
 
     const handleRefresh = async () => {
         setIsLoading(true);
-        router.reload({ 
+        router.reload({
             only: ['analytics'],
             onFinish: () => setIsLoading(false)
+        });
+    };
+
+    const handleGenerateAI = async () => {
+        setIsGeneratingAI(true);
+        router.post('/analytics/generate-ai', {}, {
+            onFinish: () => setIsGeneratingAI(false),
+            onSuccess: () => {
+                router.reload({ only: ['analytics'] });
+            }
         });
     };
 
@@ -140,7 +152,7 @@ export default function Analytics({ analytics }: AnalyticsProps) {
     return (
         <AppLayout>
             <Head title="Analytics Dashboard" />
-            
+
             <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 mt-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -156,21 +168,56 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                             <Clock className="h-4 w-4 inline mr-1" />
                             Last updated: {formatDate(analytics.generated_at)}
+                            {analytics.is_cached && (
+                                <Badge className="ml-2 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                                    Cached
+                                </Badge>
+                            )}
                         </div>
                         <Button
+                            onClick={handleGenerateAI}
+                            disabled={isGeneratingAI || isLoading}
+                            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                            title="Generate fresh AI analysis using OpenAI GPT-4"
+                        >
+                            {isGeneratingAI ? (
+                                <Brain className="h-4 w-4 animate-pulse mr-2" />
+                            ) : (
+                                <Brain className="h-4 w-4 mr-2" />
+                            )}
+                            {isGeneratingAI ? 'Generating...' : 'Generate AI Analysis'}
+                        </Button>
+                        <Button
                             onClick={handleRefresh}
-                            disabled={isLoading}
+                            disabled={isLoading || isGeneratingAI}
                             className="bg-[#2E79B5] hover:bg-[#2568A0]"
+                            variant="outline"
                         >
                             {isLoading ? (
                                 <RefreshCw className="h-4 w-4 animate-spin mr-2" />
                             ) : (
                                 <RefreshCw className="h-4 w-4 mr-2" />
                             )}
-                            Refresh
+                            {analytics.is_cached ? 'Refresh Cache' : 'Refresh'}
                         </Button>
                     </div>
                 </div>
+
+                {/* Flash Messages */}
+                {flash?.success && (
+                    <Alert className="bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800">
+                        <AlertDescription className="text-green-800 dark:text-green-200">
+                            {flash.success}
+                        </AlertDescription>
+                    </Alert>
+                )}
+                {flash?.error && (
+                    <Alert className="bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800">
+                        <AlertDescription className="text-red-800 dark:text-red-200">
+                            {flash.error}
+                        </AlertDescription>
+                    </Alert>
+                )}
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -197,7 +244,7 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                                         {analytics.insights.analyzed_feedback?.toLocaleString() || 0}
                                     </p>
                                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        {analytics.insights.total_feedback > 0 
+                                        {analytics.insights.total_feedback > 0
                                             ? ((analytics.insights.analyzed_feedback / analytics.insights.total_feedback) * 100).toFixed(1)
                                             : 0}% coverage
                                     </p>
@@ -294,11 +341,11 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                                                     </h3>
                                                     {getTrendIcon(topic.trend)}
                                                 </div>
-                                                
+
                                                 <p className="text-gray-600 dark:text-gray-400 mb-3">
                                                     {topic.description}
                                                 </p>
-                                                
+
                                                 <div className="flex flex-wrap items-center gap-2 mb-3">
                                                     <Badge variant="outline" className="flex items-center gap-1">
                                                         <MapPin className="h-3 w-3" />
@@ -312,7 +359,7 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                                                         {topic.locations?.length || 0} locations
                                                     </Badge>
                                                 </div>
-                                                
+
                                                 <div className="flex items-center gap-4 mb-2">
                                                     <div className="flex-1">
                                                         <div className="flex items-center justify-between text-sm mb-1">
@@ -520,7 +567,7 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-sm ${
-                                                    topic.trend === 'up' ? 'text-red-600' : 
+                                                    topic.trend === 'up' ? 'text-red-600' :
                                                     topic.trend === 'down' ? 'text-green-600' : 'text-gray-600'
                                                 }`}>
                                                     {topic.change > 0 ? '+' : ''}{topic.change}%

@@ -15,11 +15,17 @@ final class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Create a test user
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+        ]);
+        $users = User::factory()->count(30)->create(); // Increased from 15 to 30
+
+//User::factory(30)->create();
+        // Run the feedback seeder
+        $this->call([
+            FeedbackSeeder::class,
         ]);
     }
 }

@@ -26,7 +26,7 @@ export default function VotingCard({ feedback, auth, className }: VotingCardProp
     // Calculate vote counts
     const upvotes = feedback.votes?.filter(vote => vote.vote === 'upvote').length || 0;
     const downvotes = feedback.votes?.filter(vote => vote.vote === 'downvote').length || 0;
-    
+
     // Get user's current vote
     const getUserVote = () => {
         if (!auth.user || !feedback.votes) return null;
@@ -67,7 +67,7 @@ export default function VotingCard({ feedback, auth, className }: VotingCardProp
 
             // Send vote to server
             const voteTypeForServer = voteType === 'up' ? 'upvote' : 'downvote';
-            
+
             await router.post('/feedback/vote', {
                 feedback_id: feedback.id,
                 vote_type: voteTypeForServer,
@@ -80,7 +80,7 @@ export default function VotingCard({ feedback, auth, className }: VotingCardProp
                         const newUpvotes = updatedFeedback.votes.filter((v: any) => v.vote === 'upvote').length;
                         const newDownvotes = updatedFeedback.votes.filter((v: any) => v.vote === 'downvote').length;
                         setVoteCount({ up: newUpvotes, down: newDownvotes });
-                        
+
                         // Update user's current vote
                         const userVote = updatedFeedback.votes.find((v: any) => v.user_id === auth.user?.id);
                         setCurrentVote(userVote ? (userVote.vote === 'upvote' ? 'up' : 'down') : null);
@@ -115,15 +115,15 @@ export default function VotingCard({ feedback, auth, className }: VotingCardProp
                             disabled={isVoting || !auth.user}
                             className={cn(
                                 "flex items-center space-x-2 transition-all",
-                                currentVote === 'up' 
-                                    ? "bg-green-500 hover:bg-green-600 text-white" 
+                                currentVote === 'up'
+                                    ? "bg-green-500 hover:bg-green-600 text-white"
                                     : "hover:bg-green-50 hover:text-green-600 hover:border-green-300"
                             )}
                         >
                             <ThumbsUp className="h-4 w-4" />
                             <span>{voteCount.up}</span>
                         </Button>
-                        
+
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                             Helpful
                         </div>
@@ -135,7 +135,7 @@ export default function VotingCard({ feedback, auth, className }: VotingCardProp
                         <div className="text-sm text-gray-500 dark:text-gray-400">
                             Not Helpful
                         </div>
-                        
+
                         <Button
                             variant={currentVote === 'down' ? 'default' : 'outline'}
                             size="sm"
@@ -143,8 +143,8 @@ export default function VotingCard({ feedback, auth, className }: VotingCardProp
                             disabled={isVoting || !auth.user}
                             className={cn(
                                 "flex items-center space-x-2 transition-all",
-                                currentVote === 'down' 
-                                    ? "bg-red-500 hover:bg-red-600 text-white" 
+                                currentVote === 'down'
+                                    ? "bg-red-500 hover:bg-red-600 text-white"
                                     : "hover:bg-red-50 hover:text-red-600 hover:border-red-300"
                             )}
                         >

@@ -19,16 +19,6 @@ const mainNavItems: NavItem[] = [
         icon: MessageSquareText,
     },
     {
-        title: 'Initiatives',
-        href: '/initiatives',
-        icon: ClipboardList,
-    },
-    {
-        title: 'Community',
-        href: '/community',
-        icon: Users2,
-    },
-    {
         title: 'Analytics',
         href: '/analytics',
         icon: BarChart3,

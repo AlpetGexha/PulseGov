@@ -10,10 +10,29 @@ use App\Enum\UrgencyLevel;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use OpenAI\Laravel\Facades\OpenAI;
+
+/**
+ * Analytics Controller with AI-Powered Insights
+ *
+ * This controller provides AI-driven analytics for citizen feedback,
+ * including prioritized topics, sentiment analysis, and actionable recommendations.
+ *
+ * Features:
+ * - AI-powered topic prioritization using OpenAI GPT-4
+ * - Sentiment analysis and urgency scoring
+ * - Real-time analytics generation
+ * - Fallback mechanisms for when AI is unavailable
+ * - Performance metrics and trend analysis
+ *
+ * Usage:
+ * - GET /analytics - Display the analytics dashboard
+ * - POST /analytics/generate-ai - Generate fresh AI analysis on-demand
+ */
 
 class AnalyticsController extends Controller
 {
@@ -27,12 +46,54 @@ class AnalyticsController extends Controller
         //    return redirect()->back()->with('error', 'You are not authorized to access this page.');
         //}
 
-        // Generate analytics data
-        $analytics = $this->generateAnalyticsData();
+        // Get cached analytics data or generate fresh data
+        $analytics = $this->getCachedAnalyticsData();
 
         return Inertia::render('AnalyticsNew', [
             'analytics' => $analytics,
         ]);
+    }
+
+    /**
+     * Get cached analytics data or generate fresh data if cache is empty.
+     */
+    private function getCachedAnalyticsData(): array
+    {
+        $cacheKey = 'ai_analytics_data';
+        $cacheDuration = 3600; // 1 hour
+
+        // Try to get cached data first
+        $cachedData = Cache::get($cacheKey);
+
+        if ($cachedData) {
+            // Add cache indicator
+            $cachedData['is_cached'] = true;
+            $cachedData['cache_expires_at'] = now()->addSeconds($cacheDuration)->toISOString();
+
+            Log::info('Using cached analytics data', [
+                'cache_key' => $cacheKey,
+                'generated_at' => $cachedData['generated_at']
+            ]);
+
+            return $cachedData;
+        }
+
+        // Generate fresh data if no cache
+        $freshData = $this->generateAnalyticsData();
+
+        // Cache the fresh data
+        Cache::put($cacheKey, $freshData, $cacheDuration);
+
+        Log::info('Generated and cached fresh analytics data', [
+            'cache_key' => $cacheKey,
+            'cache_duration' => $cacheDuration
+        ]);
+
+        // Add cache indicator
+        $freshData['is_cached'] = false;
+        $freshData['cache_expires_at'] = now()->addSeconds($cacheDuration)->toISOString();
+
+        return $freshData;
     }
 
     /**
@@ -137,6 +198,8 @@ class AnalyticsController extends Controller
     private function generatePrioritizedTopics(): array
     {
         try {
+            Log::info('🧠 [Original Method] Starting OpenAI topic prioritization');
+
             // Get recent feedback with analysis
             $feedbackData = Feedback::with(['aIAnalysis', 'user'])
                 ->whereNotNull('sentiment')
@@ -145,11 +208,18 @@ class AnalyticsController extends Controller
                 ->get();
 
             if ($feedbackData->isEmpty()) {
+                Log::warning('No feedback data available for prioritization');
                 return [];
             }
 
             // Generate prioritized topics using OpenAI
             $prompt = $this->buildPrioritizationPrompt($feedbackData);
+
+            Log::info('Calling OpenAI API for topic prioritization...', [
+                'model' => 'gpt-4o',
+                'prompt_length' => strlen($prompt)
+            ]);
+
             $response = OpenAI::chat()->create([
                 'model' => 'gpt-4o',
                 'messages' => [
@@ -168,19 +238,35 @@ class AnalyticsController extends Controller
                 'temperature' => 0.3,
             ]);
 
+            Log::info('✅ OpenAI API response received', [
+                'response_length' => strlen($response->choices[0]->message->content ?? ''),
+                'tokens_used' => $response->usage->totalTokens ?? 0
+            ]);
+
             $aiResponse = json_decode($response->choices[0]->message->content, true);
 
             if (isset($aiResponse['prioritized_topics'])) {
+                Log::info('🎯 Successfully parsed AI topics', [
+                    'count' => count($aiResponse['prioritized_topics'])
+                ]);
                 return $aiResponse['prioritized_topics'];
             }
 
             // Fallback to manual prioritization
+            Log::warning('AI response missing prioritized_topics, falling back to manual');
             return $this->manualTopicPrioritization($feedbackData);
 
         } catch (\Exception $e) {
-            Log::error('Error generating prioritized topics', [
-                'error' => $e->getMessage()
+            Log::error('❌ [CRITICAL] OpenAI topic prioritization failed', [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
             ]);
+
+            // Also log to console/error log
+            error_log('PulseGov OpenAI Error (Topics): ' . $e->getMessage());
 
             return $this->getFallbackTopics();
         }
@@ -391,8 +477,7 @@ Focus on specific, actionable recommendations that address the highest priority 
      */
     private function manualTopicPrioritization($feedbackData): array
     {
-        // Group feedback by department and calculate priority scores
-        $departmentGroups = $feedbackData->groupBy('department_assigned');
+         $departmentGroups = $feedbackData->groupBy('department_assigned');
         $prioritizedTopics = [];
 
         foreach ($departmentGroups as $department => $feedbacks) {
@@ -578,5 +663,365 @@ Focus on specific, actionable recommendations that address the highest priority 
                 'Develop transparent reporting on government response times',
             ],
         ];
+    }
+
+    /**
+     * Generate AI analysis on demand and cache the results.
+     */
+    public function generateAI()
+    {
+        try {
+            Log::info('=== Starting AI Analysis Generation ===', [
+                'user_id' => Auth::id(),
+                'timestamp' => now(),
+                'openai_api_key_exists' => !empty(config('openai.api_key'))
+            ]);
+
+            // Check OpenAI configuration
+            if (empty(config('openai.api_key'))) {
+                Log::error('OpenAI API key is not configured');
+                return redirect()->back()->with('error', 'OpenAI API key is not configured. Please check your environment settings.');
+            }
+
+            // Get fresh feedback data for AI analysis
+            $feedbackData = Feedback::with(['aIAnalysis', 'user'])
+                ->whereNotNull('sentiment')
+                ->orderBy('created_at', 'desc')
+                ->limit(100)
+                ->get();
+
+            Log::info('Feedback data retrieved', [
+                'count' => $feedbackData->count(),
+                'has_sentiment' => $feedbackData->whereNotNull('sentiment')->count()
+            ]);
+
+            if ($feedbackData->isEmpty()) {
+                Log::warning('No feedback data available for AI analysis');
+                return redirect()->back()->with('error', 'No feedback data available for AI analysis.');
+            }
+
+            // Get current cached data as fallback
+            $currentData = Cache::get('ai_analytics_data', $this->getFallbackAnalyticsData());
+
+            // Force generate fresh AI analysis with detailed logging
+            Log::info('Starting OpenAI topic prioritization...');
+            $prioritizedTopics = $this->generatePrioritizedTopicsWithLogging($feedbackData, $currentData['prioritized_topics'] ?? []);
+
+            Log::info('Starting OpenAI recommendations generation...');
+            $aiRecommendations = $this->generateAIRecommendationsWithLogging($prioritizedTopics, $currentData['ai_recommendations'] ?? []);
+
+            // Generate complete analytics data with AI results
+            $analyticsData = $this->generateAnalyticsDataWithAI($prioritizedTopics, $aiRecommendations);
+
+            // Cache the fresh AI analysis for 1 hour
+            $cacheKey = 'ai_analytics_data';
+            $cacheDuration = 3600; // 1 hour
+
+            Cache::put($cacheKey, $analyticsData, $cacheDuration);
+
+            Log::info('=== AI analysis completed successfully ===', [
+                'topics_count' => count($prioritizedTopics),
+                'recommendations_count' => count($aiRecommendations),
+                'user_id' => Auth::id(),
+                'cache_key' => $cacheKey,
+                'cache_duration' => $cacheDuration
+            ]);
+
+            return redirect()->back()->with('success', 'AI analysis generated successfully! Found ' . count($prioritizedTopics) . ' prioritized topics and cached for 1 hour.');
+
+        } catch (\Exception $e) {
+            Log::error('=== CRITICAL ERROR in AI analysis generation ===', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'user_id' => Auth::id(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            // Log to console as well
+            error_log('PulseGov AI Analysis Error: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Failed to generate AI analysis: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Clear cached analytics data.
+     */
+    public function clearCache()
+    {
+        try {
+            $cacheKey = 'ai_analytics_data';
+
+            Cache::forget($cacheKey);
+
+            Log::info('Analytics cache cleared', [
+                'cache_key' => $cacheKey,
+                'user_id' => Auth::id()
+            ]);
+
+            return redirect()->back()->with('success', 'Cache cleared successfully! Next page load will generate fresh data.');
+
+        } catch (\Exception $e) {
+            Log::error('Error clearing analytics cache', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id()
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to clear cache: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Generate AI-prioritized topics with detailed logging and fallback.
+     */
+    private function generatePrioritizedTopicsWithLogging($feedbackData, $fallbackTopics = []): array
+    {
+        try {
+            Log::info('🧠 Starting OpenAI topic prioritization', [
+                'feedback_count' => $feedbackData->count(),
+                'model' => 'gpt-4o'
+            ]);
+
+            if ($feedbackData->isEmpty()) {
+                Log::warning('No feedback data for AI topic prioritization, using fallback');
+                return $fallbackTopics ?: $this->getFallbackTopics();
+            }
+
+            // Build the prompt
+            $prompt = $this->buildPrioritizationPrompt($feedbackData);
+
+            Log::info('Sending request to OpenAI for topic prioritization...', [
+                'prompt_length' => strlen($prompt),
+                'api_key_configured' => !empty(config('openai.api_key'))
+            ]);
+
+            // Make OpenAI API call
+            $response = OpenAI::chat()->create([
+                'model' => 'gpt-4o',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are an AI assistant for government analytics. Your task is to analyze citizen feedback and prioritize topics for government action. Return a JSON array of topics with detailed analysis.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'response_format' => [
+                    'type' => 'json_object'
+                ],
+                'temperature' => 0.3,
+                'max_tokens' => 4000,
+            ]);
+
+            Log::info('✅ OpenAI response received for topics', [
+                'response_length' => strlen($response->choices[0]->message->content ?? ''),
+                'usage_tokens' => $response->usage->totalTokens ?? 0
+            ]);
+
+            $aiResponse = json_decode($response->choices[0]->message->content, true);
+
+            if (isset($aiResponse['prioritized_topics']) && is_array($aiResponse['prioritized_topics'])) {
+                Log::info('🎯 AI topics parsed successfully', [
+                    'topics_count' => count($aiResponse['prioritized_topics'])
+                ]);
+                return $aiResponse['prioritized_topics'];
+            } else {
+                Log::warning('AI response does not contain valid prioritized_topics, using manual prioritization');
+                return $this->manualTopicPrioritization($feedbackData);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('❌ OpenAI topic prioritization failed', [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'file' => $e->getFile() . ':' . $e->getLine()
+            ]);
+
+            // Log to console
+            error_log('OpenAI Topic Prioritization Error: ' . $e->getMessage());
+
+            // Return existing data or fallback
+            return $fallbackTopics ?: $this->manualTopicPrioritization($feedbackData);
+        }
+    }
+
+    /**
+     * Generate AI recommendations with detailed logging and fallback.
+     */
+    private function generateAIRecommendationsWithLogging(array $prioritizedTopics, $fallbackRecommendations = []): array
+    {
+        try {
+            Log::info('💡 Starting OpenAI recommendations generation', [
+                'topics_count' => count($prioritizedTopics),
+                'model' => 'gpt-4o'
+            ]);
+
+            if (empty($prioritizedTopics)) {
+                Log::warning('No prioritized topics for AI recommendations, using fallback');
+                return $fallbackRecommendations ?: $this->getFallbackRecommendations();
+            }
+
+            $prompt = "Based on the following prioritized citizen feedback topics, provide actionable recommendations for government officials:
+
+Topics: " . json_encode($prioritizedTopics, JSON_PRETTY_PRINT) . "
+
+Please return a JSON object with the following structure:
+{
+    \"immediate_actions\": [\"Action 1\", \"Action 2\", \"Action 3\"],
+    \"long_term_strategies\": [\"Strategy 1\", \"Strategy 2\", \"Strategy 3\"],
+    \"resource_allocation\": [\"Allocation 1\", \"Allocation 2\", \"Allocation 3\"],
+    \"communication_strategies\": [\"Communication 1\", \"Communication 2\", \"Communication 3\"]
+}
+
+Focus on specific, actionable recommendations that address the highest priority topics.";
+
+            Log::info('Sending request to OpenAI for recommendations...', [
+                'prompt_length' => strlen($prompt),
+                'api_key_configured' => !empty(config('openai.api_key'))
+            ]);
+
+            $response = OpenAI::chat()->create([
+                'model' => 'gpt-4o',
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => 'You are an AI assistant for government strategy. Provide practical, actionable recommendations based on citizen feedback analysis.'
+                    ],
+                    [
+                        'role' => 'user',
+                        'content' => $prompt
+                    ]
+                ],
+                'response_format' => [
+                    'type' => 'json_object'
+                ],
+                'temperature' => 0.3,
+                'max_tokens' => 2000,
+            ]);
+
+            Log::info('✅ OpenAI response received for recommendations', [
+                'response_length' => strlen($response->choices[0]->message->content ?? ''),
+                'usage_tokens' => $response->usage->totalTokens ?? 0
+            ]);
+
+            $aiResponse = json_decode($response->choices[0]->message->content, true);
+
+            if ($aiResponse && is_array($aiResponse)) {
+                Log::info('💡 AI recommendations parsed successfully', [
+                    'immediate_actions' => count($aiResponse['immediate_actions'] ?? []),
+                    'long_term_strategies' => count($aiResponse['long_term_strategies'] ?? []),
+                    'resource_allocation' => count($aiResponse['resource_allocation'] ?? []),
+                    'communication_strategies' => count($aiResponse['communication_strategies'] ?? [])
+                ]);
+                return $aiResponse;
+            } else {
+                Log::warning('AI response is not valid for recommendations, using fallback');
+                return $fallbackRecommendations ?: $this->getFallbackRecommendations();
+            }
+
+        } catch (\Exception $e) {
+            Log::error('❌ OpenAI recommendations generation failed', [
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+                'file' => $e->getFile() . ':' . $e->getLine()
+            ]);
+
+            // Log to console
+            error_log('OpenAI Recommendations Error: ' . $e->getMessage());
+
+            // Return existing data or fallback
+            return $fallbackRecommendations ?: $this->getFallbackRecommendations();
+        }
+    }
+
+    /**
+     * Generate analytics data with AI results integrated.
+     */
+    private function generateAnalyticsDataWithAI($prioritizedTopics, $aiRecommendations): array
+    {
+        try {
+            Log::info('📊 Generating complete analytics with AI data');
+
+            // Get basic statistics
+            $totalFeedback = Feedback::count();
+            $analyzedFeedback = Feedback::whereNotNull('sentiment')->count();
+
+            // Get sentiment distribution
+            $sentimentDistribution = [
+                'positive' => Feedback::where('sentiment', FeedbackSentiment::POSITIVE)->count(),
+                'negative' => Feedback::where('sentiment', FeedbackSentiment::NEGATIVE)->count(),
+                'neutral' => Feedback::where('sentiment', FeedbackSentiment::NEUTRAL)->count(),
+            ];
+
+            // Get urgency distribution
+            $urgencyDistribution = [
+                'critical' => Feedback::where('urgency_level', UrgencyLevel::CRITICAL)->count(),
+                'high' => Feedback::where('urgency_level', UrgencyLevel::HIGH)->count(),
+                'medium' => Feedback::where('urgency_level', UrgencyLevel::MEDIUM)->count(),
+                'low' => Feedback::where('urgency_level', UrgencyLevel::LOW)->count(),
+            ];
+
+            // Get other analytics data
+            $departmentWorkload = Feedback::select('department_assigned', DB::raw('count(*) as count'))
+                ->whereNotNull('department_assigned')
+                ->groupBy('department_assigned')
+                ->orderBy('count', 'desc')
+                ->get()
+                ->pluck('count', 'department_assigned')
+                ->toArray();
+
+            $locationHotspots = Feedback::select('location', DB::raw('count(*) as count'), DB::raw('AVG(CASE
+                WHEN urgency_level = "critical" THEN 4
+                WHEN urgency_level = "high" THEN 3
+                WHEN urgency_level = "medium" THEN 2
+                ELSE 1 END) as avg_urgency'))
+                ->whereNotNull('location')
+                ->groupBy('location')
+                ->orderBy('count', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'location' => $item->location,
+                        'count' => $item->count,
+                        'avg_urgency' => round($item->avg_urgency, 1),
+                    ];
+                })
+                ->toArray();
+
+            $trendingTopics = $this->getTrendingTopics();
+            $topConcerns = $this->getTopConcerns();
+            $performanceMetrics = $this->calculatePerformanceMetrics();
+
+            return [
+                'prioritized_topics' => $prioritizedTopics,
+                'insights' => [
+                    'total_feedback' => $totalFeedback,
+                    'analyzed_feedback' => $analyzedFeedback,
+                    'top_concerns' => $topConcerns,
+                    'sentiment_distribution' => $sentimentDistribution,
+                    'urgency_distribution' => $urgencyDistribution,
+                    'department_workload' => $departmentWorkload,
+                    'location_hotspots' => $locationHotspots,
+                    'trending_topics' => $trendingTopics,
+                ],
+                'ai_recommendations' => $aiRecommendations,
+                'performance_metrics' => $performanceMetrics,
+                'generated_at' => now()->toISOString(),
+                'ai_generated' => true,
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Error generating analytics data with AI', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Return fallback data
+            return $this->getFallbackAnalyticsData();
+        }
     }
 }

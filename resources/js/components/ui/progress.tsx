@@ -9,7 +9,7 @@ interface ProgressProps {
 
 export function Progress({ value, className, max = 100 }: ProgressProps) {
     const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
-    
+
     return (
         <div className={cn("relative w-full bg-gray-200 rounded-full h-2", className)}>
             <div

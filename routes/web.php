@@ -13,9 +13,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
-    
+
     // Analytics Dashboard (admin only)
     Route::get('analytics', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::post('analytics/generate-ai', [App\Http\Controllers\AnalyticsController::class, 'generateAI'])->name('analytics.generate-ai');
+    Route::post('analytics/clear-cache', [App\Http\Controllers\AnalyticsController::class, 'clearCache'])->name('analytics.clear-cache');
 });
 
 // Feedback Forum Routes

@@ -9,9 +9,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { 
-    TrendingUp, 
-    TrendingDown, 
+import {
+    TrendingUp,
+    TrendingDown,
     Brain,
     AlertTriangle,
     Calendar,
@@ -153,7 +153,7 @@ export default function Analytics({ analytics, auth }: AnalyticsProps) {
     return (
         <AppLayout>
             <Head title="Analytics Dashboard" />
-            
+
             <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 mt-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -306,11 +306,11 @@ export default function Analytics({ analytics, auth }: AnalyticsProps) {
                                                         </h3>
                                                         {getTrendIcon(topic.trend)}
                                                     </div>
-                                                    
+
                                                     <p className="text-gray-600 dark:text-gray-400 mb-3">
                                                         {topic.description}
                                                     </p>
-                                                    
+
                                                     <div className="flex flex-wrap items-center gap-2 mb-3">
                                                         <Badge variant="outline" className="flex items-center gap-1">
                                                             <MapPin className="h-3 w-3" />
@@ -324,7 +324,7 @@ export default function Analytics({ analytics, auth }: AnalyticsProps) {
                                                             {topic.locations.length} locations
                                                         </Badge>
                                                     </div>
-                                                    
+
                                                     <div className="flex items-center gap-4 mb-2">
                                                         <div className="flex-1">
                                                             <div className="flex items-center justify-between text-sm mb-1">
@@ -546,7 +546,7 @@ export default function Analytics({ analytics, auth }: AnalyticsProps) {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <span className={`text-sm ${
-                                                    topic.trend === 'up' ? 'text-red-600' : 
+                                                    topic.trend === 'up' ? 'text-red-600' :
                                                     topic.trend === 'down' ? 'text-green-600' : 'text-gray-600'
                                                 }`}>
                                                     {topic.change > 0 ? '+' : ''}{topic.change}%
