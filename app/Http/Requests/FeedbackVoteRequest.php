@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enum\VoteType;
+use Illuminate\Foundation\Http\FormRequest;
 
 class FeedbackVoteRequest extends FormRequest
 {
@@ -15,7 +16,7 @@ class FeedbackVoteRequest extends FormRequest
     {
         return [
             'feedback_id' => ['required', 'exists:feedback,id'],
-             //   'vote' => ['required', 'string', 'in:' . implode(',', array_column(VoteType::cases(), 'value'))],
+            'vote' => ['required', 'string', 'in:' . implode(',', array_column(VoteType::cases(), 'value'))],
         ];
     }
 

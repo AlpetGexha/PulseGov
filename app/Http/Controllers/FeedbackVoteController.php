@@ -15,7 +15,7 @@ class FeedbackVoteController extends Controller
     /**
      * Store or update a vote for feedback.
      */
-    public function vote(FeedbackVoteRequest $request): JsonResponse
+    public function vote(FeedbackVoteRequest $request): RedirectResponse
     {
         try {
             $validated = $request->validated();
@@ -31,18 +31,12 @@ class FeedbackVoteController extends Controller
                 // If same vote type, remove it (toggle off)
                 if ($vote->vote->value === $validated['vote']) {
                     $vote->delete();
-                    return response()->json([
-                        'message' => 'Vote removed successfully',
-                        'voteStatus' => null
-                    ]);
+                    return back()->with('success', 'Vote removed successfully');
                 }
 
                 // If different vote type, update it
                 $vote->update(['vote' => $validated['vote']]);
-                return response()->json([
-                    'message' => 'Vote updated successfully',
-                    'voteStatus' => $validated['vote']
-                ]);
+                return back()->with('success', 'Vote updated successfully');
             }
 
             // Create new vote
@@ -52,15 +46,9 @@ class FeedbackVoteController extends Controller
                 'vote' => $validated['vote'],
             ]);
 
-            return response()->json([
-                'message' => 'Vote recorded successfully',
-                'voteStatus' => $validated['vote']
-            ], 201);
+            return back()->with('success', 'Vote recorded successfully');
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to record vote',
-                'error' => $e->getMessage()
-            ], 500);
+            return back()->with('error', 'Failed to record vote: ' . $e->getMessage());
         }
     }
 

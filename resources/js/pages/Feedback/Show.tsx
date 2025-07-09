@@ -31,12 +31,12 @@ import { toast } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
 
 export default function FeedbackShow({ feedback, auth }) {
-    const [replyingTo, setReplyingTo] = useState(null);
+    const [replyingTo, setReplyingTo] = useState<number | null>(null);
 
     // Form handling for comments
     const { data, setData, post, processing, reset, errors } = useForm({
         content: '',
-        parent_id: null,
+        parent_id: null as number | null,
     });
 
     // Form handling for votes
@@ -46,7 +46,7 @@ export default function FeedbackShow({ feedback, auth }) {
     });
 
     // Submit comment
-    const handleSubmitComment = (e) => {
+    const handleSubmitComment = (e: React.FormEvent) => {
         e.preventDefault();
         post(route('feedback.comments.store', feedback.id), {
             onSuccess: () => {
@@ -60,13 +60,21 @@ export default function FeedbackShow({ feedback, auth }) {
         });
     };
 
+    // Get user's current vote
+    const getUserVote = () => {
+        if (!auth.user || !feedback.votes) return null;
+        const userVote = feedback.votes.find((vote: any) => vote.user_id === auth.user.id);
+        return userVote?.vote || null;
+    };
+
     // Handle voting
-    const handleVote = (voteType) => {
+    const handleVote = (voteType: string) => {
         if (!auth.user) {
             toast.error('Please log in to vote');
             return;
         }
 
+        // Set the vote data
         voteForm.setData({
             feedback_id: feedback.id,
             vote: voteType
@@ -74,20 +82,20 @@ export default function FeedbackShow({ feedback, auth }) {
 
         voteForm.post(route('feedback.vote'), {
             preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Vote recorded successfully');
-                // Refresh the page to update vote counts
-                window.location.reload();
+            onSuccess: (page: any) => {
+                const message = page.props.flash?.success || 'Vote recorded successfully';
+                toast.success(message);
             },
-            onError: (errors) => {
+            onError: (errors: any) => {
                 console.error(errors);
-                toast.error('Failed to record vote');
+                const message = errors.message || 'Failed to record vote';
+                toast.error(message);
             }
         });
     };
 
     // Get feedback type icon
-    const getFeedbackTypeIcon = (type) => {
+    const getFeedbackTypeIcon = (type: string) => {
         switch (type) {
             case 'complaint':
                 return <AlertTriangle className="h-5 w-5" />;
@@ -103,7 +111,7 @@ export default function FeedbackShow({ feedback, auth }) {
     };
 
     // Get sentiment color
-    const getSentimentColor = (sentiment) => {
+    const getSentimentColor = (sentiment: string) => {
         switch (sentiment) {
             case 'positive':
                 return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
@@ -123,7 +131,7 @@ export default function FeedbackShow({ feedback, auth }) {
     };
 
     // Format date
-    const formatDate = (dateString) => {
+    const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
@@ -134,7 +142,7 @@ export default function FeedbackShow({ feedback, auth }) {
     };
 
     // Start replying to a comment
-    const startReply = (commentId) => {
+    const startReply = (commentId: number) => {
         setReplyingTo(commentId);
         setData('parent_id', commentId);
     };
@@ -152,7 +160,7 @@ export default function FeedbackShow({ feedback, auth }) {
     };
 
     // Render user avatar
-    const renderAvatar = (user) => (
+    const renderAvatar = (user: any) => (
         <Avatar>
             <AvatarImage src={user?.profile_photo_url} alt={user?.name} />
             <AvatarFallback>{user?.name?.charAt(0) || 'U'}</AvatarFallback>
@@ -160,7 +168,7 @@ export default function FeedbackShow({ feedback, auth }) {
     );
 
     // Nested comments renderer
-    const renderComments = (comments, depth = 0) => {
+    const renderComments = (comments: any[], depth = 0) => {
         if (!comments || !comments.length) return null;
 
         return comments.map(comment => (
@@ -281,7 +289,7 @@ export default function FeedbackShow({ feedback, auth }) {
                         <ChevronLeft className="mr-2 h-4 w-4" />
                         Back to Feedback
                     </Link>
-                    
+
                     <div className="flex items-center space-x-3">
                         <Button
                             variant="outline"
@@ -292,7 +300,7 @@ export default function FeedbackShow({ feedback, auth }) {
                             <Share2 className="h-4 w-4" />
                             Share
                         </Button>
-                        
+
                         <div className="text-sm text-gray-500">
                             ID: <span className="font-mono">{feedback.tracking_code}</span>
                         </div>
@@ -507,38 +515,52 @@ export default function FeedbackShow({ feedback, auth }) {
                                     <div className="text-center space-y-4">
                                         <div className="flex items-center justify-center space-x-4">
                                             <Button
-                                                variant="outline"
+                                                variant={getUserVote() === 'upvote' ? 'default' : 'outline'}
                                                 size="sm"
                                                 onClick={() => handleVote('upvote')}
-                                                className="flex items-center gap-2 hover:bg-green-50 hover:text-green-600 hover:border-green-300"
-                                                disabled={!auth.user}
+                                                className={`flex items-center gap-2 transition-all ${
+                                                    getUserVote() === 'upvote' 
+                                                        ? 'bg-green-500 hover:bg-green-600 text-white border-green-500' 
+                                                        : 'hover:bg-green-50 hover:text-green-600 hover:border-green-300'
+                                                }`}
+                                                disabled={!auth.user || voteForm.processing}
                                             >
                                                 <ChevronUp className="h-4 w-4" />
-                                                Support
+                                                {getUserVote() === 'upvote' ? 'Supported' : 'Support'}
                                             </Button>
-
+                                            
                                             <div className="text-center">
                                                 <div className="text-2xl font-bold text-[#2E79B5]">
                                                     {getTotalVotes()}
                                                 </div>
                                                 <div className="text-xs text-gray-500">votes</div>
                                             </div>
-
+                                            
                                             <Button
-                                                variant="outline"
+                                                variant={getUserVote() === 'downvote' ? 'default' : 'outline'}
                                                 size="sm"
                                                 onClick={() => handleVote('downvote')}
-                                                className="flex items-center gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
-                                                disabled={!auth.user}
+                                                className={`flex items-center gap-2 transition-all ${
+                                                    getUserVote() === 'downvote' 
+                                                        ? 'bg-red-500 hover:bg-red-600 text-white border-red-500' 
+                                                        : 'hover:bg-red-50 hover:text-red-600 hover:border-red-300'
+                                                }`}
+                                                disabled={!auth.user || voteForm.processing}
                                             >
                                                 <ChevronDown className="h-4 w-4" />
-                                                Disagree
+                                                {getUserVote() === 'downvote' ? 'Disagreed' : 'Disagree'}
                                             </Button>
                                         </div>
-
-                                        {!auth.user && (
+                                        
+                                        {!auth.user ? (
                                             <p className="text-xs text-gray-500">
                                                 Login to vote and show your support
+                                            </p>
+                                        ) : (
+                                            <p className="text-xs text-gray-500">
+                                                {getUserVote() === 'upvote' && 'You supported this feedback. Click Support again to remove your vote.'}
+                                                {getUserVote() === 'downvote' && 'You disagreed with this feedback. Click Disagree again to remove your vote.'}
+                                                {!getUserVote() && 'Click to support or disagree with this feedback'}
                                             </p>
                                         )}
                                     </div>
