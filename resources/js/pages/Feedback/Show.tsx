@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import {
     ChevronLeft,
-    ChevronUp,
-    ChevronDown,
     MessageSquare,
     AlertTriangle,
     Lightbulb,
@@ -15,34 +13,30 @@ import {
     Flag,
     Share2,
     Send,
-    Heart,
-    MoreHorizontal,
-    MapPin,
-    Clock,
-    Users
+    MapPin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
+import VotingCard from '@/components/Feedback/VotingCard';
 
-export default function FeedbackShow({ feedback, auth }) {
+interface FeedbackShowProps {
+    feedback: any;
+    auth: any;
+}
+
+export default function FeedbackShow({ feedback, auth }: FeedbackShowProps) {
     const [replyingTo, setReplyingTo] = useState<number | null>(null);
 
     // Form handling for comments
     const { data, setData, post, processing, reset, errors } = useForm({
         content: '',
         parent_id: null as number | null,
-    });
-
-    // Form handling for votes
-    const voteForm = useForm({
-        feedback_id: feedback.id,
-        vote: '',
     });
 
     // Submit comment
@@ -56,40 +50,6 @@ export default function FeedbackShow({ feedback, auth }) {
             },
             onError: (error) => {
                 toast.error('Failed to post comment.' + error.message);
-            }
-        });
-    };
-
-    // Get user's current vote
-    const getUserVote = () => {
-        if (!auth.user || !feedback.votes) return null;
-        const userVote = feedback.votes.find((vote: any) => vote.user_id === auth.user.id);
-        return userVote?.vote || null;
-    };
-
-    // Handle voting
-    const handleVote = (voteType: string) => {
-        if (!auth.user) {
-            toast.error('Please log in to vote');
-            return;
-        }
-
-        // Set the vote data
-        voteForm.setData({
-            feedback_id: feedback.id,
-            vote: voteType
-        });
-
-        voteForm.post(route('feedback.vote'), {
-            preserveScroll: true,
-            onSuccess: (page: any) => {
-                const message = page.props.flash?.success || 'Vote recorded successfully';
-                toast.success(message);
-            },
-            onError: (errors: any) => {
-                console.error(errors);
-                const message = errors.message || 'Failed to record vote';
-                toast.error(message);
             }
         });
     };
@@ -121,13 +81,6 @@ export default function FeedbackShow({ feedback, auth }) {
             default:
                 return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
         }
-    };
-
-    // Calculate total votes
-    const getTotalVotes = () => {
-        const upvotes = feedback.votes?.filter(v => v.vote === 'upvote').length || 0;
-        const downvotes = feedback.votes?.filter(v => v.vote === 'downvote').length || 0;
-        return upvotes - downvotes;
     };
 
     // Format date
@@ -505,67 +458,7 @@ export default function FeedbackShow({ feedback, auth }) {
                         {/* Sidebar */}
                         <div className="space-y-6">
                             {/* Voting Card */}
-                            <Card className="shadow-sm border">
-                                <CardHeader>
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                        Community Support
-                                    </h3>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-center space-y-4">
-                                        <div className="flex items-center justify-center space-x-4">
-                                            <Button
-                                                variant={getUserVote() === 'upvote' ? 'default' : 'outline'}
-                                                size="sm"
-                                                onClick={() => handleVote('upvote')}
-                                                className={`flex items-center gap-2 transition-all ${
-                                                    getUserVote() === 'upvote' 
-                                                        ? 'bg-green-500 hover:bg-green-600 text-white border-green-500' 
-                                                        : 'hover:bg-green-50 hover:text-green-600 hover:border-green-300'
-                                                }`}
-                                                disabled={!auth.user || voteForm.processing}
-                                            >
-                                                <ChevronUp className="h-4 w-4" />
-                                                {getUserVote() === 'upvote' ? 'Supported' : 'Support'}
-                                            </Button>
-                                            
-                                            <div className="text-center">
-                                                <div className="text-2xl font-bold text-[#2E79B5]">
-                                                    {getTotalVotes()}
-                                                </div>
-                                                <div className="text-xs text-gray-500">votes</div>
-                                            </div>
-                                            
-                                            <Button
-                                                variant={getUserVote() === 'downvote' ? 'default' : 'outline'}
-                                                size="sm"
-                                                onClick={() => handleVote('downvote')}
-                                                className={`flex items-center gap-2 transition-all ${
-                                                    getUserVote() === 'downvote' 
-                                                        ? 'bg-red-500 hover:bg-red-600 text-white border-red-500' 
-                                                        : 'hover:bg-red-50 hover:text-red-600 hover:border-red-300'
-                                                }`}
-                                                disabled={!auth.user || voteForm.processing}
-                                            >
-                                                <ChevronDown className="h-4 w-4" />
-                                                {getUserVote() === 'downvote' ? 'Disagreed' : 'Disagree'}
-                                            </Button>
-                                        </div>
-                                        
-                                        {!auth.user ? (
-                                            <p className="text-xs text-gray-500">
-                                                Login to vote and show your support
-                                            </p>
-                                        ) : (
-                                            <p className="text-xs text-gray-500">
-                                                {getUserVote() === 'upvote' && 'You supported this feedback. Click Support again to remove your vote.'}
-                                                {getUserVote() === 'downvote' && 'You disagreed with this feedback. Click Disagree again to remove your vote.'}
-                                                {!getUserVote() && 'Click to support or disagree with this feedback'}
-                                            </p>
-                                        )}
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <VotingCard feedback={feedback} auth={auth} />
 
                             {/* Feedback Info */}
                             <Card className="shadow-sm border">
