@@ -27,7 +27,7 @@ class AnalyzeFeedback
                 Log::info('Feedback already analyzed', [
                     'feedback_id' => $feedback->id,
                 ]);
-                return $feedback->aIAnalysis;
+                return $feedback->aIAnalysis()->first();
             }
 
             // Call OpenAI API to analyze the feedback
@@ -65,39 +65,64 @@ class AnalyzeFeedback
      */
     private function analyzeWithAI(string $message): array
     {
+        try {
+            // Set execution time limit for AI operations
+            set_time_limit(120); // 2 minutes for AI calls
 
-        $feedback = Feedback::all()->toBase();
+            $feedback = Feedback::all()->toBase();
+            $dataset = Departament::all()->toBase();
 
-        $dataset = Departament::all()->toBase();
-        //
+            Log::info('Calling OpenAI API for feedback analysis', [
+                'message_length' => strlen($message),
+                'timeout' => config('openai.analytics_timeout', 120)
+            ]);
 
-        $response = OpenAI::chat()->create([
-            'model' => 'gpt-4o',
-            'messages' => [
-                [
-                    'role' => 'system',
-                    'content' => "You are an AI assistant for a government feedback system {$feedback}. Your task is to analyze citizen feedback and provide useful insights",
-                ],
-                [
-                    'role' => 'user',
-                    'content' => "Analyze the following feedback and return a JSON object with these fields:
-                        sentiment (positive, negative, or neutral),
-                        urgency_level (low, medium, high, critical),
-                        feedback_type (complaint, suggestion, question, compliment),
-                        tags (array of relevant tags),
-                        department (most relevant government department),
-                        summary (brief summary in 1-2 sentences).
+            $response = $this->makeOpenAICallWithRetry(function() use ($message, $feedback) {
+                return OpenAI::chat()->create([
+                    'model' => 'gpt-4o',
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => "You are an AI assistant for a government feedback system {$feedback}. Your task is to analyze citizen feedback and provide useful insights",
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => "Analyze the following feedback and return a JSON object with these fields:
+                                sentiment (positive, negative, or neutral),
+                                urgency_level (low, medium, high, critical),
+                                feedback_type (complaint, suggestion, question, compliment),
+                                tags (array of relevant tags),
+                                department (most relevant government department),
+                                summary (brief summary in 1-2 sentences).
 
-                        Feedback: {$message}"
-                ]
-            ],
-            'response_format' => [
-                'type' => 'json_object'
-            ],
-            'temperature' => 0.2,
-        ]);
+                                Feedback: {$message}"
+                        ]
+                    ],
+                    'response_format' => [
+                        'type' => 'json_object'
+                    ],
+                    'temperature' => 0.2,
+                ]);
+            });
 
-        return json_decode($response->choices[0]->message->content, true);
+            Log::info('OpenAI API response received for feedback analysis', [
+                'response_length' => strlen($response->choices[0]->message->content ?? ''),
+                'tokens_used' => $response->usage->totalTokens ?? 0
+            ]);
+
+            return json_decode($response->choices[0]->message->content, true);
+
+        } catch (\Exception $e) {
+            Log::error('OpenAI API call failed in feedback analysis', [
+                'error' => $e->getMessage(),
+                'error_type' => get_class($e),
+                'is_timeout' => str_contains($e->getMessage(), 'execution time') || str_contains($e->getMessage(), 'timeout'),
+                'message_length' => strlen($message)
+            ]);
+
+            // Return fallback analysis if OpenAI fails
+            return $this->getFallbackAnalysis($message);
+        }
     }
 
     /**
@@ -194,10 +219,134 @@ class AnalyzeFeedback
     private function mapFeedbackType(string $feedbackType): FeedbackType
     {
         return match (strtolower($feedbackType)) {
-            'complaint' => FeedbackType::COMPLAINT,
+            'complaint', 'problem' => FeedbackType::PROBLEM,
             'suggestion' => FeedbackType::SUGGESTION,
-            'compliment' => FeedbackType::COMPLIMENT,
-            default => FeedbackType::QUESTION,
+            'compliment', 'praise' => FeedbackType::PRAISE,
+            default => FeedbackType::SUGGESTION,
         };
+    }
+
+    /**
+     * Get fallback analysis when OpenAI fails.
+     *
+     * @param string $message
+     * @return array
+     */
+    private function getFallbackAnalysis(string $message): array
+    {
+        // Simple keyword-based analysis as fallback
+        $messageLower = strtolower($message);
+
+        // Determine sentiment based on keywords
+        $positiveKeywords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'like', 'thank'];
+        $negativeKeywords = ['bad', 'terrible', 'awful', 'horrible', 'hate', 'dislike', 'broken', 'problem', 'issue', 'complaint'];
+
+        $sentiment = 'neutral';
+        foreach ($positiveKeywords as $keyword) {
+            if (str_contains($messageLower, $keyword)) {
+                $sentiment = 'positive';
+                break;
+            }
+        }
+        foreach ($negativeKeywords as $keyword) {
+            if (str_contains($messageLower, $keyword)) {
+                $sentiment = 'negative';
+                break;
+            }
+        }
+
+        // Determine urgency based on keywords
+        $urgencyLevel = 'medium';
+        $urgentKeywords = ['urgent', 'emergency', 'critical', 'immediately', 'asap', 'broken', 'dangerous'];
+        foreach ($urgentKeywords as $keyword) {
+            if (str_contains($messageLower, $keyword)) {
+                $urgencyLevel = 'high';
+                break;
+            }
+        }
+
+        // Determine feedback type
+        $feedbackType = 'suggestion';
+        if (str_contains($messageLower, 'complain') || str_contains($messageLower, 'problem')) {
+            $feedbackType = 'problem';
+        } elseif (str_contains($messageLower, 'suggest') || str_contains($messageLower, 'idea')) {
+            $feedbackType = 'suggestion';
+        } elseif (str_contains($messageLower, 'thank') || str_contains($messageLower, 'great')) {
+            $feedbackType = 'praise';
+        }
+
+        // Basic department assignment
+        $department = 'General Services';
+        $departmentKeywords = [
+            'Public Works' => ['road', 'street', 'pothole', 'traffic', 'infrastructure'],
+            'Parks and Recreation' => ['park', 'playground', 'recreation', 'sports'],
+            'Public Safety' => ['police', 'fire', 'emergency', 'safety', 'crime'],
+            'Transportation' => ['bus', 'transport', 'transit', 'parking'],
+            'Environment' => ['waste', 'recycling', 'pollution', 'environment'],
+        ];
+
+        foreach ($departmentKeywords as $dept => $keywords) {
+            foreach ($keywords as $keyword) {
+                if (str_contains($messageLower, $keyword)) {
+                    $department = $dept;
+                    break 2;
+                }
+            }
+        }
+
+        return [
+            'sentiment' => $sentiment,
+            'urgency_level' => $urgencyLevel,
+            'feedback_type' => $feedbackType,
+            'tags' => ['fallback-analysis'],
+            'department' => $department,
+            'summary' => substr($message, 0, 100) . (strlen($message) > 100 ? '...' : ''),
+        ];
+    }
+
+    /**
+     * Make OpenAI API call with retry mechanism for timeout handling.
+     */
+    private function makeOpenAICallWithRetry(callable $callback, int $maxRetries = 2, int $delaySeconds = 3): mixed
+    {
+        $attempt = 0;
+
+        while ($attempt < $maxRetries) {
+            try {
+                $attempt++;
+
+                Log::info('Making OpenAI API call for feedback analysis', [
+                    'attempt' => $attempt,
+                    'max_retries' => $maxRetries,
+                    'timeout' => config('openai.analytics_timeout', 120)
+                ]);
+
+                return $callback();
+
+            } catch (\Exception $e) {
+                $isTimeout = str_contains($e->getMessage(), 'execution time') ||
+                            str_contains($e->getMessage(), 'timeout') ||
+                            str_contains($e->getMessage(), 'cURL error 28');
+
+                Log::warning('OpenAI API call failed for feedback analysis', [
+                    'attempt' => $attempt,
+                    'max_retries' => $maxRetries,
+                    'is_timeout' => $isTimeout,
+                    'error' => $e->getMessage()
+                ]);
+
+                // If this is the last attempt or not a timeout, throw the exception
+                if ($attempt >= $maxRetries || !$isTimeout) {
+                    throw $e;
+                }
+
+                // Wait before retry
+                $waitTime = $delaySeconds * $attempt;
+                Log::info("Retrying feedback analysis OpenAI call in {$waitTime} seconds...");
+                sleep($waitTime);
+            }
+        }
+
+        throw new \Exception('OpenAI API call failed after maximum retries');
     }
 }

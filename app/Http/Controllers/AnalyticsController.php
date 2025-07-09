@@ -200,6 +200,9 @@ class AnalyticsController extends Controller
         try {
             Log::info('🧠 [Original Method] Starting OpenAI topic prioritization');
 
+            // Increase execution time limit for AI operations
+            set_time_limit(120); // 2 minutes for AI calls
+
             // Get recent feedback with analysis
             $feedbackData = Feedback::with(['aIAnalysis', 'user'])
                 ->whereNotNull('sentiment')
@@ -236,6 +239,7 @@ class AnalyticsController extends Controller
                     'type' => 'json_object'
                 ],
                 'temperature' => 0.3,
+                'max_tokens' => 4000,
             ]);
 
             Log::info('✅ OpenAI API response received', [
@@ -259,9 +263,11 @@ class AnalyticsController extends Controller
         } catch (\Exception $e) {
             Log::error('❌ [CRITICAL] OpenAI topic prioritization failed', [
                 'error' => $e->getMessage(),
+                'error_type' => get_class($e),
                 'code' => $e->getCode(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
+                'is_timeout' => str_contains($e->getMessage(), 'execution time') || str_contains($e->getMessage(), 'timeout'),
                 'trace' => $e->getTraceAsString()
             ]);
 
@@ -348,6 +354,9 @@ Focus on actionable insights that help government officials make informed decisi
     private function generateAIRecommendations(array $prioritizedTopics): array
     {
         try {
+            // Increase execution time limit for AI operations
+            set_time_limit(120); // 2 minutes for AI calls
+
             $prompt = "Based on the following prioritized citizen feedback topics, provide actionable recommendations for government officials:
 
 Topics: " . json_encode($prioritizedTopics, JSON_PRETTY_PRINT) . "
@@ -361,6 +370,11 @@ Please return a JSON object with the following structure:
 }
 
 Focus on specific, actionable recommendations that address the highest priority topics.";
+
+            Log::info('Calling OpenAI API for recommendations...', [
+                'model' => 'gpt-4o',
+                'prompt_length' => strlen($prompt)
+            ]);
 
             $response = OpenAI::chat()->create([
                 'model' => 'gpt-4o',
@@ -378,6 +392,12 @@ Focus on specific, actionable recommendations that address the highest priority 
                     'type' => 'json_object'
                 ],
                 'temperature' => 0.3,
+                'max_tokens' => 2000,
+            ]);
+
+            Log::info('✅ OpenAI recommendations response received', [
+                'response_length' => strlen($response->choices[0]->message->content ?? ''),
+                'tokens_used' => $response->usage->totalTokens ?? 0
             ]);
 
             $aiResponse = json_decode($response->choices[0]->message->content, true);
@@ -385,8 +405,13 @@ Focus on specific, actionable recommendations that address the highest priority 
             return $aiResponse ?: $this->getFallbackRecommendations();
 
         } catch (\Exception $e) {
-            Log::error('Error generating AI recommendations', [
-                'error' => $e->getMessage()
+            Log::error('❌ [CRITICAL] OpenAI recommendations failed', [
+                'error' => $e->getMessage(),
+                'error_type' => get_class($e),
+                'code' => $e->getCode(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'is_timeout' => str_contains($e->getMessage(), 'execution time') || str_contains($e->getMessage(), 'timeout'),
             ]);
 
             return $this->getFallbackRecommendations();
@@ -447,9 +472,7 @@ Focus on specific, actionable recommendations that address the highest priority 
     private function calculatePerformanceMetrics(): array
     {
         // Calculate average response time (simplified)
-        $avgResponseTime = Feedback::whereNotNull('updated_at')
-            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, updated_at)) as avg_hours')
-            ->value('avg_hours') ?? 24;
+        $avgResponseTime = 24;
 
         // Calculate resolution rate
         $totalFeedback = Feedback::count();
@@ -671,10 +694,14 @@ Focus on specific, actionable recommendations that address the highest priority 
     public function generateAI()
     {
         try {
+            // Increase execution time limit for AI operations
+            set_time_limit(180); // 3 minutes for full AI analysis
+
             Log::info('=== Starting AI Analysis Generation ===', [
                 'user_id' => Auth::id(),
                 'timestamp' => now(),
-                'openai_api_key_exists' => !empty(config('openai.api_key'))
+                'openai_api_key_exists' => !empty(config('openai.api_key')),
+                'execution_time_limit' => ini_get('max_execution_time')
             ]);
 
             // Check OpenAI configuration
@@ -686,9 +713,10 @@ Focus on specific, actionable recommendations that address the highest priority 
             // Get fresh feedback data for AI analysis
             $feedbackData = Feedback::with(['aIAnalysis', 'user'])
                 ->whereNotNull('sentiment')
-                ->orderBy('created_at', 'desc')
+                // ->orderBy('created_at', 'desc')
                 ->limit(100)
                 ->get();
+
 
             Log::info('Feedback data retrieved', [
                 'count' => $feedbackData->count(),
@@ -732,16 +760,23 @@ Focus on specific, actionable recommendations that address the highest priority 
         } catch (\Exception $e) {
             Log::error('=== CRITICAL ERROR in AI analysis generation ===', [
                 'error' => $e->getMessage(),
+                'error_type' => get_class($e),
                 'trace' => $e->getTraceAsString(),
                 'user_id' => Auth::id(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
+                'is_timeout' => str_contains($e->getMessage(), 'execution time') || str_contains($e->getMessage(), 'timeout')
             ]);
 
             // Log to console as well
             error_log('PulseGov AI Analysis Error: ' . $e->getMessage());
 
-            return redirect()->back()->with('error', 'Failed to generate AI analysis: ' . $e->getMessage());
+            // Provide specific error message for timeout
+            $errorMessage = str_contains($e->getMessage(), 'execution time') || str_contains($e->getMessage(), 'timeout')
+                ? 'AI analysis timed out. This can happen with large datasets. Please try again or contact support.'
+                : 'Failed to generate AI analysis: ' . $e->getMessage();
+
+            return redirect()->back()->with('error', $errorMessage);
         }
     }
 
@@ -778,9 +813,13 @@ Focus on specific, actionable recommendations that address the highest priority 
     private function generatePrioritizedTopicsWithLogging($feedbackData, $fallbackTopics = []): array
     {
         try {
+            // Increase execution time limit for AI operations
+            set_time_limit(120); // 2 minutes for AI calls
+
             Log::info('🧠 Starting OpenAI topic prioritization', [
                 'feedback_count' => $feedbackData->count(),
-                'model' => 'gpt-4o'
+                'model' => 'gpt-4o',
+                'execution_time_limit' => ini_get('max_execution_time')
             ]);
 
             if ($feedbackData->isEmpty()) {
@@ -794,27 +833,27 @@ Focus on specific, actionable recommendations that address the highest priority 
             Log::info('Sending request to OpenAI for topic prioritization...', [
                 'prompt_length' => strlen($prompt),
                 'api_key_configured' => !empty(config('openai.api_key'))
-            ]);
-
-            // Make OpenAI API call
-            $response = OpenAI::chat()->create([
-                'model' => 'gpt-4o',
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => 'You are an AI assistant for government analytics. Your task is to analyze citizen feedback and prioritize topics for government action. Return a JSON array of topics with detailed analysis.'
+            ]);            // Make OpenAI API call with retry mechanism
+            $response = $this->makeOpenAICallWithRetry(function() use ($prompt) {
+                return OpenAI::chat()->create([
+                    'model' => 'gpt-4o',
+                    'messages' => [
+                        [
+                            'role' => 'system',
+                            'content' => 'You are an AI assistant for government analytics. Your task is to analyze citizen feedback and prioritize topics for government action. Return a JSON array of topics with detailed analysis.'
+                        ],
+                        [
+                            'role' => 'user',
+                            'content' => $prompt
+                        ]
                     ],
-                    [
-                        'role' => 'user',
-                        'content' => $prompt
-                    ]
-                ],
-                'response_format' => [
-                    'type' => 'json_object'
-                ],
-                'temperature' => 0.3,
-                'max_tokens' => 4000,
-            ]);
+                    'response_format' => [
+                        'type' => 'json_object'
+                    ],
+                    'temperature' => 0.3,
+                    'max_tokens' => 4000,
+                ]);
+            });
 
             Log::info('✅ OpenAI response received for topics', [
                 'response_length' => strlen($response->choices[0]->message->content ?? ''),
@@ -836,8 +875,10 @@ Focus on specific, actionable recommendations that address the highest priority 
         } catch (\Exception $e) {
             Log::error('❌ OpenAI topic prioritization failed', [
                 'error' => $e->getMessage(),
+                'error_type' => get_class($e),
                 'code' => $e->getCode(),
-                'file' => $e->getFile() . ':' . $e->getLine()
+                'file' => $e->getFile() . ':' . $e->getLine(),
+                'is_timeout' => str_contains($e->getMessage(), 'execution time') || str_contains($e->getMessage(), 'timeout'),
             ]);
 
             // Log to console
@@ -854,9 +895,13 @@ Focus on specific, actionable recommendations that address the highest priority 
     private function generateAIRecommendationsWithLogging(array $prioritizedTopics, $fallbackRecommendations = []): array
     {
         try {
+            // Increase execution time limit for AI operations
+            set_time_limit(120); // 2 minutes for AI calls
+
             Log::info('💡 Starting OpenAI recommendations generation', [
                 'topics_count' => count($prioritizedTopics),
-                'model' => 'gpt-4o'
+                'model' => 'gpt-4o',
+                'execution_time_limit' => ini_get('max_execution_time')
             ]);
 
             if (empty($prioritizedTopics)) {
@@ -925,8 +970,10 @@ Focus on specific, actionable recommendations that address the highest priority 
         } catch (\Exception $e) {
             Log::error('❌ OpenAI recommendations generation failed', [
                 'error' => $e->getMessage(),
+                'error_type' => get_class($e),
                 'code' => $e->getCode(),
-                'file' => $e->getFile() . ':' . $e->getLine()
+                'file' => $e->getFile() . ':' . $e->getLine(),
+                'is_timeout' => str_contains($e->getMessage(), 'execution time') || str_contains($e->getMessage(), 'timeout')
             ]);
 
             // Log to console
@@ -1023,5 +1070,51 @@ Focus on specific, actionable recommendations that address the highest priority 
             // Return fallback data
             return $this->getFallbackAnalyticsData();
         }
+    }
+
+    /**
+     * Make OpenAI API call with retry mechanism for timeout handling.
+     */
+    private function makeOpenAICallWithRetry(callable $callback, int $maxRetries = 2, int $delaySeconds = 5): mixed
+    {
+        $attempt = 0;
+
+        while ($attempt < $maxRetries) {
+            try {
+                $attempt++;
+
+                Log::info('Making OpenAI API call', [
+                    'attempt' => $attempt,
+                    'max_retries' => $maxRetries,
+                    'timeout' => config('openai.analytics_timeout', 120)
+                ]);
+
+                return $callback();
+
+            } catch (\Exception $e) {
+                $isTimeout = str_contains($e->getMessage(), 'execution time') ||
+                            str_contains($e->getMessage(), 'timeout') ||
+                            str_contains($e->getMessage(), 'cURL error 28');
+
+                Log::warning('OpenAI API call failed', [
+                    'attempt' => $attempt,
+                    'max_retries' => $maxRetries,
+                    'is_timeout' => $isTimeout,
+                    'error' => $e->getMessage()
+                ]);
+
+                // If this is the last attempt or not a timeout, throw the exception
+                if ($attempt >= $maxRetries || !$isTimeout) {
+                    throw $e;
+                }
+
+                // Wait before retry (exponential backoff)
+                $waitTime = $delaySeconds * $attempt;
+                Log::info("Retrying OpenAI call in {$waitTime} seconds...");
+                sleep($waitTime);
+            }
+        }
+
+        throw new \Exception('OpenAI API call failed after maximum retries');
     }
 }
