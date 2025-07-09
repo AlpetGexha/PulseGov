@@ -26,7 +26,7 @@ Route::get('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::cla
     Route::put('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'update'])->name('feedback.update');
 
     // Comments
-    Route::post('/feedback/comments', [App\Http\Controllers\FeedbackCommentController::class, 'store'])->name('feedback.comments.store');
+    Route::post('/feedback/{feedback}/comments', [App\Http\Controllers\FeedbackCommentController::class, 'store'])->name('feedback.comments.store');
     Route::put('/feedback/comments/{comment}', [App\Http\Controllers\FeedbackCommentController::class, 'update'])->name('feedback.comments.update');
     Route::delete('/feedback/comments/{comment}', [App\Http\Controllers\FeedbackCommentController::class, 'destroy'])->name('feedback.comments.destroy');
     Route::post('/feedback/comments/{comment}/toggle-pin', [App\Http\Controllers\FeedbackCommentController::class, 'togglePin'])->name('feedback.comments.toggle-pin');

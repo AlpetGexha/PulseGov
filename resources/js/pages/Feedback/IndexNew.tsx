@@ -49,7 +49,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
 
-export default function FeedbackIndex({ feedbacks, auth, statuses, feedbackTypes, urgencyLevels }) {
+export default function FeedbackIndex({ feedbacks, auth }) {
     // State for filter controls
     const [activeTab, setActiveTab] = useState('all');
     const [sort, setSort] = useState('latest');
@@ -132,7 +132,7 @@ export default function FeedbackIndex({ feedbacks, auth, statuses, feedbackTypes
         <AppLayout>
             <Head title="Community Feedback" />
 
-            <div className="space-y-6 container mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+            <div className="space-y-6">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                     <div>

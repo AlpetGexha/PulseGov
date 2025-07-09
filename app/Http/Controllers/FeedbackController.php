@@ -9,6 +9,7 @@ use App\Enum\UrgencyLevel;
 use App\Http\Requests\FeedbackRequest;
 use App\Models\Feedback;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -19,9 +20,10 @@ class FeedbackController extends Controller
      */
     public function index()
     {
-        $feedbacks = Feedback::with(['user'])
+        $feedbacks = Feedback::with(['user', 'comments'])
+            ->where('is_public', true) // Only show public feedback
             ->latest()
-            ->paginate(10);
+            ->paginate(15);
 
         return Inertia::render('Feedback/Index', [
             'feedbacks' => $feedbacks,
@@ -36,20 +38,18 @@ class FeedbackController extends Controller
      */
     public function store(FeedbackRequest $request)
     {
+        $validated = $request->validated();
+
         $feedback = Feedback::create(array_merge(
-            $request->validated(),
+            $validated,
             [
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'tracking_code' => Str::upper(Str::random(10)),
+                'is_public' => $validated['is_public'] ?? false, // Default to private
                 // Default to under_review status for new feedback
                 'status' => FeedbackStatus::UNDER_REVIEW->value,
             ]
         ));
-
-        // Process any additional categories if provided
-        if ($request->has('categories')) {
-            $feedback->feedbackCategories()->sync($request->categories);
-        }
 
         return redirect()->route('feedback.show', $feedback)
             ->with('success', 'Feedback submitted successfully with tracking code: ' . $feedback->tracking_code);
@@ -60,7 +60,17 @@ class FeedbackController extends Controller
      */
     public function show(Feedback $feedback)
     {
-        $feedback->load(['user', 'feedbackCategories.category', 'feedbackStatuses']);
+        $feedback->load([
+            'user',
+            'feedbackCategories.category',
+            'feedbackStatuses',
+            'votes',
+            'comments' => function ($query) {
+                $query->with(['user', 'replies.user'])
+                      ->whereNull('parent_id')
+                      ->latest();
+            }
+        ]);
 
         return Inertia::render('Feedback/Show', [
             'feedback' => $feedback,
@@ -76,10 +86,6 @@ class FeedbackController extends Controller
     public function update(FeedbackRequest $request, Feedback $feedback)
     {
         $feedback->update($request->validated());
-
-        if ($request->has('categories')) {
-            $feedback->feedbackCategories()->sync($request->categories);
-        }
 
         return redirect()->route('feedback.show', $feedback)
             ->with('success', 'Feedback updated successfully.');

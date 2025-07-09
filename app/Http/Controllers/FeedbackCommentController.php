@@ -7,21 +7,24 @@ use App\Models\FeedbackComment;
 use App\Models\Feedback;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class FeedbackCommentController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Store a newly created comment in storage.
      */
-    public function store(FeedbackCommentRequest $request): RedirectResponse
+    public function store(FeedbackCommentRequest $request, Feedback $feedback): RedirectResponse
     {
-        $feedback = Feedback::findOrFail($request->feedback_id);
+        $validated = $request->validated();
 
         $comment = FeedbackComment::create([
             'feedback_id' => $feedback->id,
             'user_id' => Auth::id(),
-            'parent_id' => $request?->parent_id,
-            'content' => $request->content,
+            'parent_id' => $validated['parent_id'] ?? null,
+            'content' => $validated['content'],
         ]);
 
         return back()->with('success', 'Comment added successfully.');
@@ -34,8 +37,10 @@ class FeedbackCommentController extends Controller
     {
         $this->authorize('update', $comment);
 
+        $validated = $request->validated();
+
         $comment->update([
-            'content' => $request->content,
+            'content' => $validated['content'],
         ]);
 
         return back()->with('success', 'Comment updated successfully.');

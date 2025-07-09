@@ -14,7 +14,12 @@ import {
     User,
     Flag,
     Share2,
-    Send
+    Send,
+    Heart,
+    MoreHorizontal,
+    MapPin,
+    Clock,
+    Users
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
@@ -23,6 +28,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import AppLayout from '@/layouts/app-layout';
 
 export default function FeedbackShow({ feedback, auth }) {
     const [replyingTo, setReplyingTo] = useState(null);
@@ -160,305 +166,472 @@ export default function FeedbackShow({ feedback, auth }) {
         return comments.map(comment => (
             <div
                 key={comment.id}
-                className={`mb-4 ${depth > 0 ? 'ml-12' : ''}`}
+                className={`${depth > 0 ? 'ml-8 border-l-2 border-gray-200 pl-4' : ''}`}
             >
-                <div className="flex gap-3">
-                    {renderAvatar(comment.user)}
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                    <div className="flex items-start gap-3">
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                            <AvatarImage src={comment.user?.profile_photo_url} alt={comment.user?.name} />
+                            <AvatarFallback className="text-xs bg-gray-500 text-white">
+                                {comment.user?.name?.charAt(0) || 'U'}
+                            </AvatarFallback>
+                        </Avatar>
 
-                    <div className="flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium">{comment.user?.name || 'Anonymous'}</span>
-                            <span className="text-xs text-muted-foreground">
-                                {formatDate(comment.created_at)}
-                            </span>
-                        </div>
-
-                        <div className="rounded-md bg-muted/50 p-3">
-                            <p>{comment.content}</p>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 px-2 text-xs"
-                                onClick={() => startReply(comment.id)}
-                            >
-                                Reply
-                            </Button>
-                        </div>
-
-                        {/* Reply Form */}
-                        {replyingTo === comment.id && (
-                            <div className="mt-2">
-                                <form onSubmit={handleSubmitComment}>
-                                    <div className="space-y-2">
-                                        <Textarea
-                                            id="content"
-                                            value={data.content}
-                                            onChange={(e) => setData('content', e.target.value)}
-                                            placeholder="Write your reply..."
-                                            rows={3}
-                                        />
-
-                                        <div className="flex justify-end gap-2">
-                                            <Button
-                                                type="button"
-                                                size="sm"
-                                                variant="ghost"
-                                                onClick={cancelReply}
-                                            >
-                                                Cancel
-                                            </Button>
-
-                                            <Button
-                                                type="submit"
-                                                size="sm"
-                                                disabled={processing}
-                                                className="bg-[#2E79B5] hover:bg-[#2568A0]"
-                                            >
-                                                <Send className="mr-1 h-3 w-3" />
-                                                Reply
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </form>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="font-medium text-gray-900 dark:text-white">
+                                    {comment.user?.name || 'Anonymous'}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                    {formatDate(comment.created_at)}
+                                </span>
+                                {comment.is_pinned && (
+                                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                                        Pinned
+                                    </Badge>
+                                )}
                             </div>
-                        )}
 
-                        {/* Nested replies */}
-                        {comment.replies && renderComments(comment.replies, depth + 1)}
+                            <div className="text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">
+                                {comment.content.split('\n').map((line: string, index: number) => (
+                                    <p key={index} className="mb-2 last:mb-0">
+                                        {line}
+                                    </p>
+                                ))}
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 px-3 text-xs text-gray-500 hover:text-[#2E79B5] hover:bg-blue-50"
+                                    onClick={() => startReply(comment.id)}
+                                >
+                                    Reply
+                                </Button>
+
+                                {comment.replies && comment.replies.length > 0 && (
+                                    <span className="text-xs text-gray-500">
+                                        {comment.replies.length} {comment.replies.length === 1 ? 'reply' : 'replies'}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Reply Form */}
+                            {replyingTo === comment.id && (
+                                <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                    <form onSubmit={handleSubmitComment}>
+                                        <div className="space-y-3">
+                                            <Textarea
+                                                value={data.content}
+                                                onChange={(e) => setData('content', e.target.value)}
+                                                placeholder="Write your reply..."
+                                                className="min-h-[80px] resize-none border-gray-300 focus:border-[#2E79B5] focus:ring-[#2E79B5]"
+                                                rows={3}
+                                            />
+
+                                            <div className="flex justify-end gap-2">
+                                                <Button
+                                                    type="button"
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    onClick={cancelReply}
+                                                    className="text-gray-500 hover:text-gray-700"
+                                                >
+                                                    Cancel
+                                                </Button>
+
+                                                <Button
+                                                    type="submit"
+                                                    size="sm"
+                                                    disabled={processing || !data.content.trim()}
+                                                    className="bg-[#2E79B5] hover:bg-[#2568A0] text-white gap-2"
+                                                >
+                                                    <Send className="h-3 w-3" />
+                                                    Reply
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
+
+                {/* Nested replies */}
+                {comment.replies && comment.replies.length > 0 && (
+                    <div className="mt-4 space-y-3">
+                        {renderComments(comment.replies, depth + 1)}
+                    </div>
+                )}
             </div>
         ));
     };
 
     return (
-        <>
+        <AppLayout>
             <Head title={`${feedback.title} | PulseGov Feedback`} />
 
-            <div className="container max-w-6xl py-8">
-                <div className="mb-6">
-                    <Link
-                        href={route('feedback.index')}
-                        className="mb-4 inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-                    >
-                        <ChevronLeft className="mr-1 h-4 w-4" />
-                        Back to all feedback
-                    </Link>
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+                {/* Header Section */}
+                <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 dark:bg-slate-900/80 dark:border-slate-700 sticky top-0 z-10">
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                        <div className="flex items-center justify-between">
+                            <Link
+                                href={route('feedback.index')}
+                                className="inline-flex items-center text-sm font-medium text-gray-600 hover:text-[#2E79B5] transition-colors"
+                            >
+                                <ChevronLeft className="mr-2 h-4 w-4" />
+                                Back to Feedback
+                            </Link>
 
-                    {/* Main Feedback Content */}
-                    <Card>
-                        <div className="flex">
-                            {/* Voting Section */}
-                            <div className="flex w-16 flex-col items-center border-r bg-muted/20 py-4">
+                            <div className="flex items-center space-x-3">
                                 <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleVote('upvote')}
+                                    variant="outline"
+                                    size="sm"
+                                    className="hidden sm:flex items-center gap-2"
+                                    onClick={shareFeedback}
                                 >
-                                    <ChevronUp className="h-5 w-5" />
+                                    <Share2 className="h-4 w-4" />
+                                    Share
                                 </Button>
 
-                                <div className="py-1 text-center font-medium">
-                                    {getTotalVotes()}
+                                <div className="text-sm text-gray-500">
+                                    ID: <span className="font-mono">{feedback.tracking_code}</span>
                                 </div>
-
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => handleVote('downvote')}
-                                >
-                                    <ChevronDown className="h-5 w-5" />
-                                </Button>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            {/* Content Section */}
-                            <div className="flex-1">
-                                <CardHeader>
-                                    <div className="mb-2 flex flex-wrap gap-2">
-                                        <Badge variant="outline" className="flex items-center gap-1">
-                                            {getFeedbackTypeIcon(feedback.feedback_type)}
-                                            <span className="capitalize">
-                                                {feedback.feedback_type}
-                                            </span>
-                                        </Badge>
-
-                                        {feedback.sentiment && (
-                                            <Badge className={`${getSentimentColor(feedback.sentiment)}`}>
-                                                {feedback.sentiment}
-                                            </Badge>
-                                        )}
-
-                                        {feedback.department_assigned && (
-                                            <Badge variant="secondary">
-                                                {feedback.department_assigned}
-                                            </Badge>
-                                        )}
-
-                                        <Badge
-                                            className="ml-auto"
-                                            variant="outline"
-                                        >
-                                            Status: <span className="ml-1 capitalize">{feedback.status?.label || 'Under Review'}</span>
-                                        </Badge>
-                                    </div>
-
-                                    <h1 className="text-2xl font-bold">{feedback.title}</h1>
-
-                                    <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                                        <div className="flex items-center gap-2">
-                                            {renderAvatar(feedback.user)}
-                                            <span>{feedback.user?.name || 'Anonymous'}</span>
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Main Content */}
+                        <div className="lg:col-span-2 space-y-6">
+                            {/* Feedback Card */}
+                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                                <CardHeader className="pb-4">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="p-3 rounded-full bg-gradient-to-r from-[#2E79B5] to-[#1E5A8A] text-white">
+                                                {getFeedbackTypeIcon(feedback.feedback_type)}
+                                            </div>
+                                            <div>
+                                                <Badge
+                                                    variant="outline"
+                                                    className="mb-2 border-[#2E79B5] text-[#2E79B5] bg-blue-50"
+                                                >
+                                                    {feedback.feedback_type.charAt(0).toUpperCase() + feedback.feedback_type.slice(1)}
+                                                </Badge>
+                                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight">
+                                                    {feedback.title}
+                                                </h1>
+                                            </div>
                                         </div>
-                                        <span>•</span>
-                                        <span className="flex items-center gap-1">
-                                            <Calendar className="h-3 w-3" />
-                                            {formatDate(feedback.created_at)}
-                                        </span>
-                                        <span>•</span>
-                                        <span className="flex items-center gap-1">
-                                            <Tag className="h-3 w-3" />
-                                            {feedback.service || 'General'}
-                                        </span>
-                                        <span>•</span>
-                                        <span className="flex items-center gap-1">
-                                            <MessageSquare className="h-3 w-3" />
-                                            {feedback.comments?.length || 0} comments
-                                        </span>
+
+                                        <div className="flex items-center space-x-2">
+                                            <Badge
+                                                variant="secondary"
+                                                className="bg-green-100 text-green-800 border-green-200"
+                                            >
+                                                {feedback.status?.label || 'Under Review'}
+                                            </Badge>
+                                        </div>
                                     </div>
                                 </CardHeader>
 
-                                <CardContent>
-                                    <div className="prose prose-sm max-w-none dark:prose-invert">
-                                        <p>{feedback.body}</p>
+                                <CardContent className="space-y-6">
+                                    {/* Meta Information */}
+                                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                                        <div className="flex items-center gap-2">
+                                            <Avatar className="h-7 w-7">
+                                                <AvatarImage src={feedback.user?.profile_photo_url} alt={feedback.user?.name} />
+                                                <AvatarFallback className="text-xs bg-[#2E79B5] text-white">
+                                                    {feedback.user?.name?.charAt(0) || 'A'}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <span className="font-medium">{feedback.user?.name || 'Anonymous'}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <Calendar className="h-4 w-4" />
+                                            <span>{formatDate(feedback.created_at)}</span>
+                                        </div>
+
+                                        {feedback.location && (
+                                            <div className="flex items-center gap-2">
+                                                <MapPin className="h-4 w-4" />
+                                                <span>{feedback.location}</span>
+                                            </div>
+                                        )}
+
+                                        {feedback.service && (
+                                            <div className="flex items-center gap-2">
+                                                <Tag className="h-4 w-4" />
+                                                <span>{feedback.service}</span>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    {/* Tags if available */}
+                                    <Separator />
+
+                                    {/* Feedback Content */}
+                                    <div className="prose prose-lg max-w-none dark:prose-invert">
+                                        <div className="text-gray-800 dark:text-gray-200 leading-relaxed">
+                                            {feedback.body.split('\n').map((paragraph: string, index: number) => (
+                                                <p key={index} className="mb-4 last:mb-0">
+                                                    {paragraph}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* AI Analysis */}
+                                    {feedback.ai_analysis_details?.summary && (
+                                        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+                                            <div className="flex items-start gap-3">
+                                                <div className="p-2 bg-blue-500 rounded-lg">
+                                                    <Lightbulb className="h-4 w-4 text-white" />
+                                                </div>
+                                                <div className="flex-1">
+                                                    <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">AI Summary</h3>
+                                                    <p className="text-blue-800 dark:text-blue-300 text-sm">
+                                                        {feedback.ai_analysis_details.summary}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Tags */}
                                     {feedback.ai_analysis_details?.suggested_tags && (
-                                        <div className="mt-4 flex flex-wrap gap-2">
+                                        <div className="flex flex-wrap gap-2">
                                             {feedback.ai_analysis_details.suggested_tags.map((tag, index) => (
-                                                <Badge key={index} variant="secondary">
+                                                <Badge key={index} variant="secondary" className="bg-gray-100 hover:bg-gray-200">
                                                     {tag}
                                                 </Badge>
                                             ))}
                                         </div>
                                     )}
+                                </CardContent>
+                            </Card>
 
-                                    {/* AI summary if available */}
-                                    {feedback.ai_analysis_details?.summary && (
-                                        <div className="mt-4 rounded-md bg-blue-50 p-3 dark:bg-blue-900/20">
-                                            <p className="text-sm font-medium">AI Summary:</p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {feedback.ai_analysis_details.summary}
+                            {/* Comments Section */}
+                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                                <CardHeader>
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                            <MessageSquare className="h-5 w-5" />
+                                            Comments ({feedback.comments?.length || 0})
+                                        </h2>
+                                    </div>
+                                </CardHeader>
+
+                                <CardContent className="space-y-6">
+                                    {/* Comment Form */}
+                                    {auth.user ? (
+                                        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                            <div className="flex items-start gap-3">
+                                                <Avatar className="h-8 w-8">
+                                                    <AvatarImage src={auth.user?.profile_photo_url} alt={auth.user?.name} />
+                                                    <AvatarFallback className="text-xs bg-[#2E79B5] text-white">
+                                                        {auth.user?.name?.charAt(0) || 'U'}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div className="flex-1">
+                                                    <form onSubmit={handleSubmitComment} className="space-y-3">
+                                                        <Textarea
+                                                            value={data.content}
+                                                            onChange={(e) => setData('content', e.target.value)}
+                                                            placeholder="Share your thoughts on this feedback..."
+                                                            className="min-h-[100px] resize-none border-gray-300 focus:border-[#2E79B5] focus:ring-[#2E79B5]"
+                                                            rows={3}
+                                                        />
+                                                        {errors.content && (
+                                                            <p className="text-sm text-red-600">{errors.content}</p>
+                                                        )}
+                                                        <div className="flex justify-end">
+                                                            <Button
+                                                                type="submit"
+                                                                disabled={processing || !data.content.trim()}
+                                                                className="bg-[#2E79B5] hover:bg-[#2568A0] text-white gap-2"
+                                                            >
+                                                                <Send className="h-4 w-4" />
+                                                                Post Comment
+                                                            </Button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                                            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                                Join the conversation by logging in
                                             </p>
+                                            <div className="space-x-4">
+                                                <Button asChild variant="outline">
+                                                    <Link href={route('login')}>Login</Link>
+                                                </Button>
+                                                <Button asChild className="bg-[#2E79B5] hover:bg-[#2568A0]">
+                                                    <Link href={route('register')}>Register</Link>
+                                                </Button>
+                                            </div>
                                         </div>
                                     )}
-                                </CardContent>
 
-                                <CardFooter>
-                                    <div className="flex w-full items-center justify-between">
-                                        <div className="flex gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="flex items-center gap-1"
-                                                onClick={shareFeedback}
-                                            >
-                                                <Share2 className="h-4 w-4" />
-                                                Share
-                                            </Button>
+                                    <Separator />
 
-                                            {auth.user && (
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="flex items-center gap-1 text-yellow-600 hover:text-yellow-700 dark:text-yellow-500"
-                                                >
-                                                    <Flag className="h-4 w-4" />
-                                                    Report
-                                                </Button>
-                                            )}
-                                        </div>
-
-                                        {auth.user && auth.user.id === feedback.user_id && (
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                            >
-                                                Edit
-                                            </Button>
+                                    {/* Comments List */}
+                                    <div className="space-y-4">
+                                        {feedback.comments && feedback.comments.length > 0 ? (
+                                            renderComments(feedback.comments.filter(c => !c.parent_id))
+                                        ) : (
+                                            <div className="text-center py-8">
+                                                <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                                <p className="text-gray-600 dark:text-gray-400">
+                                                    No comments yet. Be the first to share your thoughts!
+                                                </p>
+                                            </div>
                                         )}
                                     </div>
-                                </CardFooter>
-                            </div>
+                                </CardContent>
+                            </Card>
                         </div>
-                    </Card>
-                </div>
 
-                {/* Comments Section */}
-                <div className="mt-8 space-y-6">
-                    <h2 className="text-xl font-bold">Comments ({feedback.comments?.length || 0})</h2>
+                        {/* Sidebar */}
+                        <div className="space-y-6">
+                            {/* Voting Card */}
+                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                                <CardHeader>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        Community Support
+                                    </h3>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-center space-y-4">
+                                        <div className="flex items-center justify-center space-x-4">
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleVote('upvote')}
+                                                className="flex items-center gap-2 hover:bg-green-50 hover:text-green-600 hover:border-green-300"
+                                                disabled={!auth.user}
+                                            >
+                                                <ChevronUp className="h-4 w-4" />
+                                                Support
+                                            </Button>
 
-                    {/* Comment Form */}
-                    {auth.user ? (
-                        <div className="mb-6">
-                            <form onSubmit={handleSubmitComment}>
-                                <div className="space-y-2">
-                                    <Textarea
-                                        id="content"
-                                        value={data.content}
-                                        onChange={(e) => setData('content', e.target.value)}
-                                        placeholder="Share your thoughts..."
-                                        rows={3}
-                                    />
-                                    {errors.content && (
-                                        <p className="text-sm text-red-600">{errors.content}</p>
+                                            <div className="text-center">
+                                                <div className="text-2xl font-bold text-[#2E79B5]">
+                                                    {getTotalVotes()}
+                                                </div>
+                                                <div className="text-xs text-gray-500">votes</div>
+                                            </div>
+
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleVote('downvote')}
+                                                className="flex items-center gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
+                                                disabled={!auth.user}
+                                            >
+                                                <ChevronDown className="h-4 w-4" />
+                                                Disagree
+                                            </Button>
+                                        </div>
+
+                                        {!auth.user && (
+                                            <p className="text-xs text-gray-500">
+                                                Login to vote and show your support
+                                            </p>
+                                        )}
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Feedback Info */}
+                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                                <CardHeader>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        Feedback Details
+                                    </h3>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">Type</span>
+                                        <Badge variant="outline" className="border-[#2E79B5] text-[#2E79B5]">
+                                            {feedback.feedback_type.charAt(0).toUpperCase() + feedback.feedback_type.slice(1)}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">Status</span>
+                                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                                            {feedback.status?.label || 'Under Review'}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">Visibility</span>
+                                        <Badge variant={feedback.is_public ? "default" : "secondary"}>
+                                            {feedback.is_public ? 'Public' : 'Private'}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">Tracking Code</span>
+                                        <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
+                                            {feedback.tracking_code}
+                                        </span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            {/* Quick Actions */}
+                            <Card className="shadow-lg border-0 bg-white/70 backdrop-blur-sm">
+                                <CardHeader>
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        Actions
+                                    </h3>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <Button
+                                        variant="outline"
+                                        className="w-full justify-start"
+                                        onClick={shareFeedback}
+                                    >
+                                        <Share2 className="mr-2 h-4 w-4" />
+                                        Share Feedback
+                                    </Button>
+
+                                    {auth.user && (
+                                        <Button
+                                            variant="outline"
+                                            className="w-full justify-start text-amber-600 hover:text-amber-700"
+                                        >
+                                            <Flag className="mr-2 h-4 w-4" />
+                                            Report Issue
+                                        </Button>
                                     )}
 
-                                    <div className="flex justify-end">
+                                    {auth.user && auth.user.id === feedback.user_id && (
                                         <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="gap-2 bg-[#2E79B5] hover:bg-[#2568A0]"
+                                            variant="outline"
+                                            className="w-full justify-start text-[#2E79B5] hover:text-[#2568A0]"
                                         >
-                                            <MessageSquare className="h-4 w-4" />
-                                            Post Comment
+                                            <User className="mr-2 h-4 w-4" />
+                                            Edit Feedback
                                         </Button>
-                                    </div>
-                                </div>
-                            </form>
+                                    )}
+                                </CardContent>
+                            </Card>
                         </div>
-                    ) : (
-                        <div className="mb-6 rounded-md bg-muted/50 p-4 text-center">
-                            <p className="text-muted-foreground">
-                                <Link href={route('login')} className="text-blue-600 underline">
-                                    Login
-                                </Link>
-                                {' '}or{' '}
-                                <Link href={route('register')} className="text-blue-600 underline">
-                                    register
-                                </Link>
-                                {' '}to join the conversation
-                            </p>
-                        </div>
-                    )}
-
-                    <Separator />
-
-                    {/* Comments List */}
-                    <div className="space-y-6">
-                        {feedback.comments && feedback.comments.length > 0 ? (
-                            renderComments(feedback.comments.filter(c => !c.parent_id))
-                        ) : (
-                            <div className="py-4 text-center">
-                                <p className="text-muted-foreground">No comments yet. Be the first to comment!</p>
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
-        </>
+        </AppLayout>
     );
 }

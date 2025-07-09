@@ -6,6 +6,7 @@ use App\Enum\FeedbackSentiment;
 use App\Enum\FeedbackStatus;
 use App\Enum\FeedbackType;
 use App\Enum\UrgencyLevel;
+use Illuminate\Foundation\Http\FormRequest;
 
 class FeedbackRequest extends FormRequest
 {
@@ -21,10 +22,11 @@ class FeedbackRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'min:10'],
             'location' => ['string','nullable'],
-            // 'service' => $this->stringRule(255, true),
+            'service' => ['string', 'nullable'],
+            'feedback_type' => ['required', 'string', 'in:suggestion,complaint,question,compliment'],
+            'is_public' => ['boolean'],
             // 'sentiment' => $this->enumRule(FeedbackSentiment::class, true),
             // 'status' => $this->enumRule(FeedbackStatus::class),
-            // 'feedback_type' => $this->enumRule(FeedbackType::class),
             // 'tracking_code' => $this->stringRule(255),
             // 'urgency_level' => $this->enumRule(UrgencyLevel::class, true),
             // 'intent' => $this->stringRule(255, true),

@@ -35,6 +35,7 @@ class Feedback extends Model
         'intent',
         'topic_cluster',
         'department_assigned',
+        'is_public'
     ];
 
     /**

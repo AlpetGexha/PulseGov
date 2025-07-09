@@ -24,6 +24,7 @@ return new class () extends Migration {
             $table->string('tracking_code', length: 255)->nullable();
             $table->string('service', 255)->nullable();
             // $table->integer('rating');
+            $table->boolean('is_public')->default(false);
             $table->string('sentiment')->nullable()->default(null);
             $table->string('status')->nullable()->default(FeedbackStatus::UNDER_REVIEW->value);
             $table->string('feedback_type')->nullable()->default(FeedbackType::SUGGESTION->value);
