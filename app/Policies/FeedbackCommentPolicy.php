@@ -9,7 +9,7 @@ use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Auth\Access\Response;
 
-class FeedbackCommentPolicy
+final class FeedbackCommentPolicy
 {
     use HandlesAuthorization;
 

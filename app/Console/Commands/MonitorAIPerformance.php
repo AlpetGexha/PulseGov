@@ -9,7 +9,7 @@ use App\Models\AIModelMetrics;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-class MonitorAIPerformance extends Command
+final class MonitorAIPerformance extends Command
 {
     /**
      * The name and signature of the console command.

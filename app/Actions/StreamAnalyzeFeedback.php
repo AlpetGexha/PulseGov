@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
 use OpenAI\Laravel\Facades\OpenAI;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class StreamAnalyzeFeedback extends AnalyzeFeedback
+final class StreamAnalyzeFeedback extends AnalyzeFeedback
 {
     /**
      * Handle the feedback analysis action with streaming output.

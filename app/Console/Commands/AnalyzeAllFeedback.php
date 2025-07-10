@@ -8,7 +8,7 @@ use App\Jobs\ProcessFeedbackAIAnalysis;
 use App\Models\Feedback;
 use Illuminate\Console\Command;
 
-class AnalyzeAllFeedback extends Command
+final class AnalyzeAllFeedback extends Command
 {
     /**
      * The name and signature of the console command.

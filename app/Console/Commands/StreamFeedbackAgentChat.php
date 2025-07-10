@@ -8,7 +8,7 @@ use App\Agents\FeedbackAgentChatBot;
 use Exception;
 use Illuminate\Console\Command;
 
-class StreamFeedbackAgentChat extends Command
+final class StreamFeedbackAgentChat extends Command
 {
     /**
      * The name and signature of the console command.

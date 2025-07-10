@@ -7,7 +7,7 @@ namespace Database\Factories;
 use App\Models\AIModelMetrics;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class AIModelMetricsFactory extends Factory
+final class AIModelMetricsFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.

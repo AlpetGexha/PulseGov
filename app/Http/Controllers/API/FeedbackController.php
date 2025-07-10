@@ -17,7 +17,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class FeedbackController extends Controller
+final class FeedbackController extends Controller
 {
     /**
      * Display a listing of the resource.

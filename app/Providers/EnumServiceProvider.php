@@ -6,7 +6,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
-class EnumServiceProvider extends ServiceProvider
+final class EnumServiceProvider extends ServiceProvider
 {
     /**
      * Register services.

@@ -7,7 +7,7 @@ namespace App\Http\Requests;
 use App\Enum\VoteType;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FeedbackVoteRequest extends FormRequest
+final class FeedbackVoteRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

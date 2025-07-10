@@ -8,7 +8,7 @@ use App\Actions\StreamAnalyzeFeedback;
 use App\Models\Feedback;
 use Illuminate\Console\Command;
 
-class StreamAnalyzeFeedbackCommand extends Command
+final class StreamAnalyzeFeedbackCommand extends Command
 {
     /**
      * The name and signature of the console command.

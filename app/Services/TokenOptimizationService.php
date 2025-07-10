@@ -8,7 +8,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use Illuminate\Support\Facades\Log;
 
-class TokenOptimizationService
+final class TokenOptimizationService
 {
     private const MAX_CONVERSATION_TOKENS = 6000;
     private const PRIORITY_MESSAGES = 5; // Always keep last 5 messages

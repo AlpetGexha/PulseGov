@@ -10,7 +10,7 @@ use App\Enum\UrgencyLevel;
 use App\Models\Feedback;
 use Illuminate\Database\Seeder;
 
-class SampleFeedbackSeeder extends Seeder
+final class SampleFeedbackSeeder extends Seeder
 {
     public function run(): void
     {

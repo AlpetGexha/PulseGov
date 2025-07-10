@@ -7,7 +7,7 @@ namespace App\Http\Resources\API;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FeedbackCommentResource extends JsonResource
+final class FeedbackCommentResource extends JsonResource
 {
     /**
      * Transform the resource into an array.

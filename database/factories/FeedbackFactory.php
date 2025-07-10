@@ -13,7 +13,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
-class FeedbackFactory extends Factory
+final class FeedbackFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.

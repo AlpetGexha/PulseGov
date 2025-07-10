@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 
-class FeedbackCommentController extends Controller
+final class FeedbackCommentController extends Controller
 {
     /**
      * Store a newly created comment in storage.

@@ -9,7 +9,7 @@ use App\Enum\FeedbackStatus;
 use App\Enum\UrgencyLevel;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FeedbackRequest extends FormRequest
+final class FeedbackRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

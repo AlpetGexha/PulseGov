@@ -6,7 +6,7 @@ namespace App\Http\Requests;
 
 use App\Enum\UserRole;
 
-class UserRequest extends FormRequest
+final class UserRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

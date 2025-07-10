@@ -9,7 +9,7 @@ use App\Http\Requests\FeedbackStatusRequest;
 use App\Models\Feedback;
 use App\Models\FeedbackStatus;
 
-class FeedbackStatusController extends Controller
+final class FeedbackStatusController extends Controller
 {
     /**
      * Store a newly created feedback status.

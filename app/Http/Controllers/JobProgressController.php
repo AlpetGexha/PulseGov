@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 
-class JobProgressController extends Controller
+final class JobProgressController extends Controller
 {
     public function getProgress(string $key): JsonResponse
     {

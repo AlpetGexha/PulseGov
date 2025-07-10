@@ -7,7 +7,7 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class EnumRule implements ValidationRule
+final class EnumRule implements ValidationRule
 {
     /**
      * @var string The enum class to validate against

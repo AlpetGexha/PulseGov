@@ -10,7 +10,7 @@ use App\Models\FeedbackStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class FeedbackStatusFactory extends Factory
+final class FeedbackStatusFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.

@@ -14,7 +14,7 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use OpenAI\Laravel\Facades\OpenAI;
 
-class AnalyzeFeedback
+final class AnalyzeFeedback
 {
     /**
      * Handle the feedback analysis action.

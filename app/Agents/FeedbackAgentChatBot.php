@@ -16,7 +16,7 @@ use NeuronAI\SystemPrompt;
 use OpenAI\Laravel\Facades\OpenAI as LaravelOpenAI;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class FeedbackAgentChatBot extends Agent
+final class FeedbackAgentChatBot extends Agent
 {
     protected Collection $feedbackData;
     protected array $parsedData = [];

@@ -7,7 +7,7 @@ namespace Database\Factories;
 use App\Models\Changelog;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ChangelogFactory extends Factory
+final class ChangelogFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.

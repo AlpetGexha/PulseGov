@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class ChatController extends Controller
+final class ChatController extends Controller
 {
     /**
      * Display the chat interface.

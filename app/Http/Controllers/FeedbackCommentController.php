@@ -11,7 +11,7 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
-class FeedbackCommentController extends Controller
+final class FeedbackCommentController extends Controller
 {
     use AuthorizesRequests;
 

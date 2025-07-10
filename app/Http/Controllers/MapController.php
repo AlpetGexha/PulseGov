@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Feedback;
 use Inertia\Inertia;
 
-class MapController extends Controller
+final class MapController extends Controller
 {
     public function index()
     {

@@ -11,7 +11,7 @@ use App\Services\TokenOptimizationService;
 use Exception;
 use Illuminate\Console\Command;
 
-class TestChatSystem extends Command
+final class TestChatSystem extends Command
 {
     protected $signature = 'chat:test';
     protected $description = 'Test the chat system functionality';

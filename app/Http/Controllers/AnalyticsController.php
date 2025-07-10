@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class AnalyticsController extends Controller
+final class AnalyticsController extends Controller
 {
     /**
      * Display the analytics dashboard.

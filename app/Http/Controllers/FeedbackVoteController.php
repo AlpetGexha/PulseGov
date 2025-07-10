@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
-class FeedbackVoteController extends Controller
+final class FeedbackVoteController extends Controller
 {
     /**
      * Store or update a vote for feedback.

@@ -6,7 +6,7 @@ namespace App\Http\Requests;
 
 use App\Enum\FeedbackStatus;
 
-class FeedbackStatusRequest extends FormRequest
+final class FeedbackStatusRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.

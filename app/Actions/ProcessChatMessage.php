@@ -14,7 +14,7 @@ use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class ProcessChatMessage
+final class ProcessChatMessage
 {
     private TokenOptimizationService $tokenService;
 
