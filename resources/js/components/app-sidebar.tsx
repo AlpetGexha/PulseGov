@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BarChart3, BookOpen, ClipboardList, Folder, LayoutDashboard, MessageSquareText, Users2 } from 'lucide-react';
+import { BarChart3, BookOpen, ClipboardList, Folder, LayoutDashboard, MessageSquareText, Users2, Bot } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -22,6 +22,11 @@ const mainNavItems: NavItem[] = [
         title: 'Analytics',
         href: '/analytics',
         icon: BarChart3,
+    },
+    {
+        title: 'AI Chat',
+        href: '/chat',
+        icon: Bot,
     },
 ];
 

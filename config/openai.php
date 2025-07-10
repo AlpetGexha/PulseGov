@@ -59,4 +59,18 @@ return [
     */
 
     'analytics_timeout' => env('OPENAI_ANALYTICS_TIMEOUT', 120), // 2 minutes for analytics
+
+    /*
+    |--------------------------------------------------------------------------
+    | HTTP Client Options
+    |--------------------------------------------------------------------------
+    |
+    | Additional HTTP client options for development environments.
+    | WARNING: Only use verify => false in development!
+    */
+
+    'http_client_options' => [
+        'verify' => env('OPENAI_VERIFY_SSL', true),
+        'timeout' => env('OPENAI_REQUEST_TIMEOUT', 90),
+    ],
 ];

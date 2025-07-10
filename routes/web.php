@@ -18,6 +18,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('analytics', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics.index');
     Route::post('analytics/generate-ai', [App\Http\Controllers\AnalyticsController::class, 'generateAI'])->name('analytics.generate-ai');
     Route::post('analytics/clear-cache', [App\Http\Controllers\AnalyticsController::class, 'clearCache'])->name('analytics.clear-cache');
+
+    // Chat Routes
+    Route::get('chat', [App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
+    Route::post('chat/conversations', [App\Http\Controllers\ChatController::class, 'createConversation'])->name('chat.conversations.create');
+    Route::get('chat/conversations/{conversation}', [App\Http\Controllers\ChatController::class, 'getConversation'])->name('chat.conversations.show');
+    Route::post('chat/conversations/{conversation}/messages', [App\Http\Controllers\ChatController::class, 'sendMessage'])->name('chat.conversations.messages.store');
+    Route::delete('chat/conversations/{conversation}', [App\Http\Controllers\ChatController::class, 'deleteConversation'])->name('chat.conversations.destroy');
+    Route::get('chat/history', [App\Http\Controllers\ChatController::class, 'getConversationHistory'])->name('chat.history');
 });
 
 // Feedback Forum Routes
@@ -25,7 +33,7 @@ Route::get('/feedback', [App\Http\Controllers\FeedbackController::class, 'index'
 Route::get('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'show'])->name('feedback.show');
 
 // Protected Feedback Routes
-// Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     // Feedback CRUD
     Route::post('/feedback', [App\Http\Controllers\FeedbackController::class, 'store'])->name('feedback.store');
     Route::put('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::class, 'update'])->name('feedback.update');
@@ -38,7 +46,7 @@ Route::get('/feedback/{feedback}', [App\Http\Controllers\FeedbackController::cla
 
     // Votes
     Route::post('/feedback/vote', [App\Http\Controllers\FeedbackVoteController::class, 'vote'])->name('feedback.vote');
-// });
+});
 
 // AJAX Endpoints
 Route::get('/feedback/{feedback}/votes', [App\Http\Controllers\FeedbackVoteController::class, 'getVoteCounts'])->name('feedback.votes.count');
