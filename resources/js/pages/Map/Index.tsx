@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { useState } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { useState, useEffect } from 'react';
 import { Icon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -15,12 +15,10 @@ interface FeedbackLocation {
     urgency_level: string;
     department_assigned: string;
     status: string;
-    category: string;
     image_url: string;
     created_at: string;
     user: {
         name: string;
-        avatar: string;
     };
     analysis: {
         summary: string;
@@ -32,133 +30,199 @@ interface Props {
     feedbacks: FeedbackLocation[];
 }
 
+// Custom hook for marker icons
+const useMarkerIcon = (urgencyLevel: string) => {
+    const colors: Record<string, string> = {
+        LOW: 'green',
+        MEDIUM: 'yellow',
+        HIGH: 'orange',
+        CRITICAL: 'red',
+        DEFAULT: 'default'
+    };
+
+    const color = colors[urgencyLevel] || colors.DEFAULT;
+
+    return new Icon({
+        iconUrl: `/images/markers/${color}-marker.png`,
+        shadowUrl: '/images/markers/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+};
+
+// Map center component
+const MapCenter = ({ lat, lng }: { lat: number; lng: number }) => {
+    const map = useMap();
+    useEffect(() => {
+        map.setView([lat, lng], 13);
+    }, [lat, lng, map]);
+    return null;
+};
+
 export default function Index({ feedbacks }: Props) {
     const [selectedFeedback, setSelectedFeedback] = useState<FeedbackLocation | null>(null);
+    const [mapCenter, setMapCenter] = useState([42.3833, 20.4333]); // Default to Gjakova
 
-    const getMarkerIcon = (urgencyLevel: string) => {
-        const colors: Record<string, string> = {
-            LOW: 'green',
-            MEDIUM: 'yellow',
-            HIGH: 'orange',
-            CRITICAL: 'red'
-        };
-
-        return new Icon({
-            iconUrl: `/images/markers/${colors[urgencyLevel] || 'blue'}-marker.png`,
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34]
-        });
+    const handleMarkerClick = (feedback: FeedbackLocation) => {
+        setSelectedFeedback(feedback);
+        setMapCenter([feedback.latitude, feedback.longitude]);
     };
 
     return (
-        <>
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
             <Head title="Feedback Map" />
-            
-            <div className="flex h-screen">
-                <MapContainer
-                    center={[42.3833, 20.4333]} // Gjakova coordinates
-                    zoom={13}
-                    className="w-3/4 h-full"
-                >
-                    <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                    
-                    {feedbacks.map((feedback) => (
-                        <Marker
-                            key={feedback.id}
-                            position={[feedback.latitude, feedback.longitude]}
-                            icon={getMarkerIcon(feedback.urgency_level)}
-                            eventHandlers={{
-                                click: () => setSelectedFeedback(feedback),
-                            }}
+
+            <div className="flex flex-col h-screen">
+                {/* Header */}
+                <div className="bg-white dark:bg-gray-800 shadow px-4 py-3">
+                    <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                        Citizen Feedback Map
+                    </h1>
+                </div>
+
+                {/* Main Content */}
+                <div className="flex flex-1 overflow-hidden">
+                    {/* Map Container */}
+                    <div className="flex-1 relative">
+                        <MapContainer
+                            center={mapCenter as [number, number]}
+                            zoom={13}
+                            className="w-full h-full"
                         >
-                            <Popup>
-                                <h3 className="font-bold">{feedback.title}</h3>
-                                <p className="text-sm">{feedback.location}</p>
-                            </Popup>
-                        </Marker>
-                    ))}
-                </MapContainer>
-
-                {selectedFeedback && (
-                    <div className="w-1/4 h-full overflow-y-auto p-4 bg-white dark:bg-gray-800 border-l">
-                        <div className="flex justify-between items-start mb-4">
-                            <h2 className="text-xl font-bold">{selectedFeedback.title}</h2>
-                            <button
-                                onClick={() => setSelectedFeedback(null)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                ×
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            <img
-                                src={selectedFeedback.image_url}
-                                alt="Feedback"
-                                className="w-full h-48 object-cover rounded"
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                             />
-
-                            <div className="flex items-center space-x-2">
-                                <img
-                                    src={selectedFeedback.user.avatar}
-                                    alt={selectedFeedback.user.name}
-                                    className="w-8 h-8 rounded-full"
-                                />
-                                <span className="text-sm">{selectedFeedback.user.name}</span>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-2 text-sm">
-                                <div className="col-span-2">
-                                    <span className="font-semibold">Location:</span> {selectedFeedback.location}
-                                </div>
-                                <div>
-                                    <span className="font-semibold">Category:</span> {selectedFeedback.category}
-                                </div>
-                                <div>
-                                    <span className="font-semibold">Status:</span> {selectedFeedback.status}
-                                </div>
-                                <div>
-                                    <span className="font-semibold">Urgency:</span> {selectedFeedback.urgency_level}
-                                </div>
-                                <div>
-                                    <span className="font-semibold">Department:</span> {selectedFeedback.department_assigned}
-                                </div>
-                                <div className="col-span-2">
-                                    <span className="font-semibold">Date:</span> {selectedFeedback.created_at}
-                                </div>
-                            </div>
-
-                            <div>
-                                <h3 className="font-semibold mb-2">Description</h3>
-                                <p className="text-sm">{selectedFeedback.body}</p>
-                            </div>
-
-                            {selectedFeedback.analysis.summary && (
-                                <div>
-                                    <h3 className="font-semibold mb-2">AI Analysis</h3>
-                                    <p className="text-sm">{selectedFeedback.analysis.summary}</p>
-                                    {selectedFeedback.analysis.keywords && (
-                                        <div className="mt-2 flex flex-wrap gap-1">
-                                            {selectedFeedback.analysis.keywords.map((keyword, index) => (
-                                                <span
-                                                    key={index}
-                                                    className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 rounded"
-                                                >
-                                                    {keyword}
-                                                </span>
-                                            ))}
+                            <MapCenter lat={mapCenter[0]} lng={mapCenter[1]} />
+                            
+                            {feedbacks.map((feedback) => (
+                                <Marker
+                                    key={feedback.id}
+                                    position={[feedback.latitude, feedback.longitude]}
+                                    icon={useMarkerIcon(feedback.urgency_level)}
+                                    eventHandlers={{
+                                        click: () => handleMarkerClick(feedback),
+                                    }}
+                                >
+                                    <Popup>
+                                        <div className="text-sm">
+                                            <h3 className="font-semibold">{feedback.title}</h3>
+                                            <p className="text-gray-600">{feedback.location}</p>
                                         </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
+                                    </Popup>
+                                </Marker>
+                            ))}
+                        </MapContainer>
                     </div>
-                )}
+
+                    {/* Sidebar */}
+                    {selectedFeedback && (
+                        <div className="w-96 bg-white dark:bg-gray-800 shadow-lg overflow-y-auto">
+                            <div className="p-4">
+                                {/* Close button */}
+                                <div className="flex justify-between items-center mb-4">
+                                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        Feedback Details
+                                    </h2>
+                                    <button
+                                        onClick={() => setSelectedFeedback(null)}
+                                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                                    >
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                {/* Feedback Image */}
+                                <div className="mb-4">
+                                    <img
+                                        src={selectedFeedback.image_url}
+                                        alt="Feedback"
+                                        className="w-full h-48 object-cover rounded-lg"
+                                    />
+                                </div>
+
+                                {/* Title and Description */}
+                                <div className="mb-4">
+                                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                                        {selectedFeedback.title}
+                                    </h3>
+                                    <p className="text-gray-600 dark:text-gray-400">
+                                        {selectedFeedback.body}
+                                    </p>
+                                </div>
+
+                                {/* Metadata Grid */}
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <div className="col-span-2">
+                                        <span className="text-gray-500 dark:text-gray-400">Location</span>
+                                        <p className="font-medium text-gray-900 dark:text-white">
+                                            {selectedFeedback.location}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 dark:text-gray-400">Status</span>
+                                        <p className="font-medium text-gray-900 dark:text-white">
+                                            {selectedFeedback.status}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 dark:text-gray-400">Urgency</span>
+                                        <p className="font-medium text-gray-900 dark:text-white">
+                                            {selectedFeedback.urgency_level}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 dark:text-gray-400">Department</span>
+                                        <p className="font-medium text-gray-900 dark:text-white">
+                                            {selectedFeedback.department_assigned}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <span className="text-gray-500 dark:text-gray-400">Submitted by</span>
+                                        <p className="font-medium text-gray-900 dark:text-white">
+                                            {selectedFeedback.user.name}
+                                        </p>
+                                    </div>
+                                    <div className="col-span-2">
+                                        <span className="text-gray-500 dark:text-gray-400">Date Submitted</span>
+                                        <p className="font-medium text-gray-900 dark:text-white">
+                                            {selectedFeedback.created_at}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* AI Analysis */}
+                                {selectedFeedback.analysis.summary && (
+                                    <div className="border-t dark:border-gray-700 pt-4">
+                                        <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                                            AI Analysis
+                                        </h4>
+                                        <p className="text-gray-600 dark:text-gray-400 mb-3">
+                                            {selectedFeedback.analysis.summary}
+                                        </p>
+                                        {selectedFeedback.analysis.keywords && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedFeedback.analysis.keywords.map((keyword, index) => (
+                                                    <span
+                                                        key={index}
+                                                        className="px-2 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full"
+                                                    >
+                                                        {keyword}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-        </>
+        </div>
     );
 }
