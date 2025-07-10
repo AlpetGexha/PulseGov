@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,24 +27,6 @@ class FeedbackComment extends Model
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'id' => 'integer',
-            'feedback_id' => 'integer',
-            'user_id' => 'integer',
-            'parent_id' => 'integer',
-            'is_pinned' => 'boolean',
-            'created_at' => 'timestamp',
-            'updated_at' => 'timestamp',
-        ];
-    }
-
-    /**
      * Get the feedback that this comment belongs to.
      */
     public function feedback(): BelongsTo
@@ -63,7 +47,7 @@ class FeedbackComment extends Model
      */
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(FeedbackComment::class, 'parent_id');
+        return $this->belongsTo(self::class, 'parent_id');
     }
 
     /**
@@ -71,6 +55,24 @@ class FeedbackComment extends Model
      */
     public function replies(): HasMany
     {
-        return $this->hasMany(FeedbackComment::class, 'parent_id');
+        return $this->hasMany(self::class, 'parent_id');
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'feedback_id' => 'integer',
+            'user_id' => 'integer',
+            'parent_id' => 'integer',
+            'is_pinned' => 'boolean',
+            'created_at' => 'timestamp',
+            'updated_at' => 'timestamp',
+        ];
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,6 +28,11 @@ class AIModelMetrics extends Model
         'tokens_used',
     ];
 
+    public function aIAnalysis(): BelongsTo
+    {
+        return $this->belongsTo(AIAnalysis::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -39,10 +46,5 @@ class AIModelMetrics extends Model
             'processing_time' => 'decimal',
             'a_i_analysis_id' => 'integer',
         ];
-    }
-
-    public function aIAnalysis(): BelongsTo
-    {
-        return $this->belongsTo(AIAnalysis::class);
     }
 }

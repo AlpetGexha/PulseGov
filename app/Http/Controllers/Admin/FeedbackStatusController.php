@@ -1,15 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Admin;
 
-use App\Enum\FeedbackSentiment;
-use App\Enum\FeedbackStatus as FeedbackStatusEnum;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FeedbackStatusRequest;
 use App\Models\Feedback;
 use App\Models\FeedbackStatus;
-use Illuminate\Http\Request;
-use Inertia\Inertia;
 
 class FeedbackStatusController extends Controller
 {

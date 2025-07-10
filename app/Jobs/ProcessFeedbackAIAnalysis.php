@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Actions\AnalyzeFeedback;
 use App\Models\Feedback;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -47,21 +50,22 @@ class ProcessFeedbackAIAnalysis implements ShouldQueue
                 Log::info('Feedback already analyzed', [
                     'feedback_id' => $this->feedback->id,
                 ]);
+
                 return;
             }
 
             // Use the action class to analyze feedback
             $analyzer->handle($this->feedback);
-            
+
             Log::info('Feedback analyzed successfully', [
                 'feedback_id' => $this->feedback->id,
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error analyzing feedback', [
                 'feedback_id' => $this->feedback->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             throw $e;
         }
     }

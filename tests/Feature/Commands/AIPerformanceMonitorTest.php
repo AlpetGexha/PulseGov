@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Models\AIAnalysis;
 use App\Models\AIModelMetrics;
 use App\Models\Feedback;

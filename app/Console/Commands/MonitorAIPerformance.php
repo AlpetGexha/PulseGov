@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\AIAnalysis;
@@ -34,10 +36,10 @@ class MonitorAIPerformance extends Command
         $avgProcessingTime = AIAnalysis::select(
             DB::raw('AVG(TIMESTAMPDIFF(SECOND, a.created_at, a_i_analyses.created_at)) as avg_time')
         )
-        ->join('feedback as a', 'a_i_analyses.feedback_id', '=', 'a.id')
-        ->whereRaw('DATE(a_i_analyses.created_at) = CURRENT_DATE')
-        ->first()
-        ->avg_time ?? 0;
+            ->join('feedback as a', 'a_i_analyses.feedback_id', '=', 'a.id')
+            ->whereRaw('DATE(a_i_analyses.created_at) = CURRENT_DATE')
+            ->first()
+            ->avg_time ?? 0;
 
         // Count analyses done today
         $analysesCount = AIAnalysis::whereDate('created_at', now()->format('Y-m-d'))->count();

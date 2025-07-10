@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
@@ -12,7 +14,7 @@ class EnumServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../../config/enums.php', 'enums'
+            __DIR__ . '/../../config/enums.php', 'enums'
         );
     }
 
@@ -22,7 +24,7 @@ class EnumServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->publishes([
-            __DIR__.'/../../config/enums.php' => config_path('enums.php'),
+            __DIR__ . '/../../config/enums.php' => config_path('enums.php'),
         ], 'pulsegov-enums');
     }
 }

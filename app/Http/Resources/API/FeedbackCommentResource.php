@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Resources\API;
 
 use Illuminate\Http\Request;
@@ -34,7 +36,7 @@ class FeedbackCommentResource extends JsonResource
 
         // Add replies if they are loaded
         if ($this->relationLoaded('replies') && $this->replies->count() > 0) {
-            $data['replies'] = FeedbackCommentResource::collection($this->replies);
+            $data['replies'] = self::collection($this->replies);
         }
 
         return $data;

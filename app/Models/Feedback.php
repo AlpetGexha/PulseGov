@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enum\FeedbackSentiment;
@@ -35,25 +37,8 @@ class Feedback extends Model
         'intent',
         'topic_cluster',
         'department_assigned',
-        'is_public'
+        'is_public',
     ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'id' => 'integer',
-            'user_id' => 'integer',
-            'sentiment' => FeedbackSentiment::class,
-            'status' => FeedbackStatusEnum::class,
-            // 'feedback_type' => FeedbackType::class,
-            'urgency_level' => UrgencyLevel::class,
-        ];
-    }
 
     public function user(): BelongsTo
     {
@@ -83,5 +68,22 @@ class Feedback extends Model
     public function votes(): HasMany
     {
         return $this->hasMany(FeedbackVote::class);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id' => 'integer',
+            'user_id' => 'integer',
+            'sentiment' => FeedbackSentiment::class,
+            'status' => FeedbackStatusEnum::class,
+            // 'feedback_type' => FeedbackType::class,
+            'urgency_level' => UrgencyLevel::class,
+        ];
     }
 }

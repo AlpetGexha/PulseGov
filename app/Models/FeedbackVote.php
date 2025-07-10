@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enum\VoteType;
@@ -22,6 +24,16 @@ class FeedbackVote extends Model
         'vote',
     ];
 
+    public function feedback(): BelongsTo
+    {
+        return $this->belongsTo(Feedback::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -36,15 +48,5 @@ class FeedbackVote extends Model
             'vote' => VoteType::class,
             'created_at' => 'timestamp',
         ];
-    }
-
-    public function feedback(): BelongsTo
-    {
-        return $this->belongsTo(Feedback::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }

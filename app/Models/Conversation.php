@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,13 +20,13 @@ class Conversation extends Model
         'context_data',
         'token_usage',
         'last_activity_at',
-        'is_active'
+        'is_active',
     ];
 
     protected $casts = [
         'context_data' => 'array',
         'last_activity_at' => 'datetime',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -58,6 +60,7 @@ class Conversation extends Model
         if ($userMessage) {
             return 'New Conversation ' . $this->created_at->format('M j, Y g:i A');
         }
+
         return 'New Conversation ' . $this->created_at->format('M j, Y g:i A');
     }
 

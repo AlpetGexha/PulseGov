@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
 use App\Rules\EnumRule;
@@ -8,10 +10,6 @@ trait FormRequestHelper
 {
     /**
      * Create a validation rule for an enum field.
-     *
-     * @param  string  $enumClass
-     * @param  bool  $nullable
-     * @return array
      */
     protected function enumRule(string $enumClass, bool $nullable = false): array
     {
@@ -28,10 +26,6 @@ trait FormRequestHelper
 
     /**
      * Get an array of standard rules for a database string field.
-     *
-     * @param  int  $maxLength
-     * @param  bool  $nullable
-     * @return array
      */
     protected function stringRule(int $maxLength = 255, bool $nullable = false): array
     {
@@ -48,11 +42,6 @@ trait FormRequestHelper
 
     /**
      * Get an array of standard rules for an integer field.
-     *
-     * @param  bool  $nullable
-     * @param  int|null  $min
-     * @param  int|null  $max
-     * @return array
      */
     protected function integerRule(bool $nullable = false, ?int $min = null, ?int $max = null): array
     {

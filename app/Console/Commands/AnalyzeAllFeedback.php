@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Jobs\ProcessFeedbackAIAnalysis;
@@ -29,7 +31,7 @@ class AnalyzeAllFeedback extends Command
     {
         $query = Feedback::query();
 
-        if (!$this->option('force')) {
+        if (! $this->option('force')) {
             // Only get feedback without analysis
             $query->whereDoesntHave('aIAnalysis');
         }
@@ -38,6 +40,7 @@ class AnalyzeAllFeedback extends Command
 
         if ($feedbackCount === 0) {
             $this->info('No unanalyzed feedback found.');
+
             return 0;
         }
 

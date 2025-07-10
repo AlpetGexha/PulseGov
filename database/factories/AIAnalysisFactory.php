@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enum\FeedbackSentiment;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\AIAnalysis;
 use App\Models\Feedback;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AIAnalysisFactory extends Factory
 {

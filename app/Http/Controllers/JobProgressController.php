@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
@@ -12,7 +14,7 @@ class JobProgressController extends Controller
         $progress = Cache::get($key, [
             'progress' => 0,
             'message' => 'Job not started',
-            'status' => 'pending'
+            'status' => 'pending',
         ]);
 
         return response()->json($progress);

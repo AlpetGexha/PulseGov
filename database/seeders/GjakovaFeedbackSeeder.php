@@ -1,13 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
+use App\Enum\FeedbackSentiment;
+use App\Enum\FeedbackType;
+use App\Enum\UrgencyLevel;
 use App\Models\Feedback;
 use App\Models\User;
-use App\Enum\FeedbackType;
-use App\Enum\FeedbackSentiment;
-use App\Enum\UrgencyLevel;
+use Illuminate\Database\Seeder;
 
 class GjakovaFeedbackSeeder extends Seeder
 {

@@ -14,7 +14,6 @@ use App\Models\FeedbackComment;
 use App\Models\FeedbackVote;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 final class FeedbackSeeder extends Seeder
 {
@@ -25,10 +24,10 @@ final class FeedbackSeeder extends Seeder
     {
         // Create additional users for seeding
         $users = User::factory()->count(30)->create();
-        
+
         // Check if admin user exists, if not create one
         $adminUser = User::where('email', 'admin@pulsegov.com')->first();
-        if (!$adminUser) {
+        if (! $adminUser) {
             $adminUser = User::factory()->create([
                 'name' => 'Admin User',
                 'email' => 'admin@pulsegov.com',
@@ -332,14 +331,14 @@ final class FeedbackSeeder extends Seeder
                 'location' => $data['location'],
                 'service' => $data['service'],
                 'is_public' => $data['is_public'],
-                            'sentiment' => $data['sentiment']->value,
+                'sentiment' => $data['sentiment']->value,
                 'status' => $data['status']->value,
                 'feedback_type' => $data['feedback_type']->value,
                 'urgency_level' => $data['urgency_level']->value,
                 'intent' => $data['intent'],
                 'topic_cluster' => $data['topic_cluster'],
                 'department_assigned' => $data['department_assigned'],
-                'tracking_code' => 'PG-' . str_pad((string)($index + 1), 4, '0', STR_PAD_LEFT),
+                'tracking_code' => 'PG-' . mb_str_pad((string) ($index + 1), 4, '0', STR_PAD_LEFT),
                 'created_at' => now()->subDays(rand(1, 30)),
                 'updated_at' => now()->subDays(rand(0, 5)),
             ]);
@@ -355,7 +354,7 @@ final class FeedbackSeeder extends Seeder
     private function addVotesToFeedback(Feedback $feedback, $users): void
     {
         // Get all users except the feedback author
-        $availableVoters = $users->where('id', '!=', $feedback->user_id            );
+        $availableVoters = $users->where('id', '!=', $feedback->user_id);
 
         // If no available voters, skip voting
         if ($availableVoters->count() === 0) {
@@ -368,7 +367,7 @@ final class FeedbackSeeder extends Seeder
 
         // E        nsure we don't try to select more users than available
         $votersCount = min($votersCount, $availableVoters->count());
-        
+
         $voters = $availableVoters->random($votersCount);
 
         foreach ($voters as $voter) {
@@ -424,7 +423,7 @@ final class FeedbackSeeder extends Seeder
             'This has been a problem for months. Glad someone finally reported it.',
             'I support this suggestion. It would benefit many residents.',
             'Has anyone contacted the relevant department about this?',
-                    'I witnessed this problem myself. Something needs to be done.',
+            'I witnessed this problem myself. Something needs to be done.',
             'Great idea! I hope the city considers implementing this.',
             'This affects my daily commute. Please prioritize this issue.',
             'I\'m willing to volunteer if community help is needed.',

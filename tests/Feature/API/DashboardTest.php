@@ -1,8 +1,7 @@
 <?php
 
-use App\Enum\FeedbackSentiment;
-use App\Enum\FeedbackStatus;
-use App\Enum\FeedbackType;
+declare(strict_types=1);
+
 use App\Enum\UrgencyLevel;
 use App\Models\AIAnalysis;
 use App\Models\Feedback;
@@ -11,12 +10,12 @@ use App\Models\User;
 beforeEach(function () {
     // Create admin user
     $this->adminUser = User::factory()->create([
-        'role' => 'admin'
+        'role' => 'admin',
     ]);
 
     // Create regular user
     $this->user = User::factory()->create([
-        'role' => 'citizen'
+        'role' => 'citizen',
     ]);
 
     // Create some test feedback with AI analysis
@@ -83,10 +82,10 @@ test('admin can view recent activity', function () {
                     'tracking_code',
                     'created_at',
                     'status',
-                ]
+                ],
             ],
             'criticalFeedback',
-            'counts'
+            'counts',
         ]);
 
     // Check that we have critical feedback

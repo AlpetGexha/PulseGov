@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enum\FeedbackSentiment;
@@ -25,6 +27,11 @@ class AIAnalysis extends Model
         'department_suggestion',
     ];
 
+    public function feedback(): BelongsTo
+    {
+        return $this->belongsTo(Feedback::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -39,10 +46,5 @@ class AIAnalysis extends Model
             'analysis_date' => 'timestamp',
             'suggested_tags' => 'array',
         ];
-    }
-
-    public function feedback(): BelongsTo
-    {
-        return $this->belongsTo(Feedback::class);
     }
 }

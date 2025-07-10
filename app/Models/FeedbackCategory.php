@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +22,16 @@ class FeedbackCategory extends Model
         'category_id',
     ];
 
+    public function feedback(): BelongsTo
+    {
+        return $this->belongsTo(Feedback::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -32,15 +44,5 @@ class FeedbackCategory extends Model
             'feedback_id' => 'integer',
             'category_id' => 'integer',
         ];
-    }
-
-    public function feedback(): BelongsTo
-    {
-        return $this->belongsTo(Feedback::class);
-    }
-
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
     }
 }

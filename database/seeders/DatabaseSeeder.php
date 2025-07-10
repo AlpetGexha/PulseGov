@@ -22,7 +22,7 @@ final class DatabaseSeeder extends Seeder
         ]);
         $users = User::factory()->count(30)->create(); // Increased from 15 to 30
 
-//User::factory(30)->create();
+        // User::factory(30)->create();
         // Run the feedback seeder
         $this->call([
             FeedbackSeeder::class,

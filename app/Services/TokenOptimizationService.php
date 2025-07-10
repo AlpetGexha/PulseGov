@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
 use App\Models\Conversation;
@@ -42,7 +44,7 @@ class TokenOptimizationService
             'conversation_id' => $conversation->id,
             'original_messages' => $messages->count(),
             'optimized_messages' => count($optimizedMessages),
-            'total_tokens' => $totalTokens
+            'total_tokens' => $totalTokens,
         ]);
 
         return $optimizedMessages;
@@ -53,14 +55,14 @@ class TokenOptimizationService
         // More accurate token estimation
         // GPT-4 typically uses ~0.75 tokens per word
         $wordCount = str_word_count($text);
-        $charCount = strlen($text);
+        $charCount = mb_strlen($text);
 
         // Estimate based on both words and characters
         $wordBasedTokens = $wordCount * 0.75;
         $charBasedTokens = $charCount / 4;
 
         // Use the higher estimate to be safe
-        return intval(max($wordBasedTokens, $charBasedTokens));
+        return (int) (max($wordBasedTokens, $charBasedTokens));
     }
 
     public function shouldCompressHistory(Conversation $conversation): bool
@@ -77,14 +79,14 @@ class TokenOptimizationService
 
         $compressedContent = $this->createSummary($oldMessages);
 
-        if (!empty($compressedContent)) {
+        if (! empty($compressedContent)) {
             // Create a summary message
             Message::create([
                 'conversation_id' => $conversation->id,
                 'role' => 'system',
-                'content' => "Previous conversation summary: " . $compressedContent,
+                'content' => 'Previous conversation summary: ' . $compressedContent,
                 'token_count' => $this->estimateTokens($compressedContent),
-                'metadata' => ['type' => 'summary', 'original_messages' => $oldMessages->count()]
+                'metadata' => ['type' => 'summary', 'original_messages' => $oldMessages->count()],
             ]);
 
             // Delete old messages
@@ -93,7 +95,7 @@ class TokenOptimizationService
             Log::info('Compressed conversation history', [
                 'conversation_id' => $conversation->id,
                 'compressed_messages' => $oldMessages->count(),
-                'summary_tokens' => $this->estimateTokens($compressedContent)
+                'summary_tokens' => $this->estimateTokens($compressedContent),
             ]);
         }
     }
@@ -107,10 +109,10 @@ class TokenOptimizationService
         $userMessages = $messages->where('role', 'user')->pluck('content');
         $assistantMessages = $messages->where('role', 'assistant')->pluck('content');
 
-        $summary = "User discussed: " . $userMessages->take(3)->implode('; ') .
-                  ". Assistant provided information about: " .
+        $summary = 'User discussed: ' . $userMessages->take(3)->implode('; ') .
+                  '. Assistant provided information about: ' .
                   $assistantMessages->take(3)->implode('; ');
 
-        return substr($summary, 0, 500) . '...';
+        return mb_substr($summary, 0, 500) . '...';
     }
 }

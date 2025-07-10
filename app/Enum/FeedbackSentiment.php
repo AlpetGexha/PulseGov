@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enum;
 
 use App\Traits\EnumHelper;
@@ -14,12 +16,10 @@ enum FeedbackSentiment: string
 
     /**
      * Get a friendly, displayable name for the enum value.
-     *
-     * @return string
      */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::POSITIVE => 'Positive',
             self::NEGATIVE => 'Negative',
             self::NEUTRAL => 'Neutral',
@@ -28,12 +28,10 @@ enum FeedbackSentiment: string
 
     /**
      * Get color for the sentiment that can be used in UI.
-     *
-     * @return string
      */
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::POSITIVE => 'green',
             self::NEGATIVE => 'red',
             self::NEUTRAL => 'gray',
