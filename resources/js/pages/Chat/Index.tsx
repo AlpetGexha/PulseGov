@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Head, router } from '@inertiajs/react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import AppLayout from '@/layouts/app-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -338,8 +340,50 @@ export default function ChatIndex({ conversations: initialConversations = [] }: 
                                                             : 'bg-muted'
                                                     }`}
                                                 >
-                                                    <div className="whitespace-pre-wrap text-sm">
-                                                        {message.content}
+                                                    <div className="text-sm">
+                                                        {message.role === 'assistant' ? (
+                                                            <ReactMarkdown
+                                                                remarkPlugins={[remarkGfm]}
+                                                                components={{
+                                                                    // Custom styling for markdown elements
+                                                                    h1: ({ children }) => <h1 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">{children}</h1>,
+                                                                    h2: ({ children }) => <h2 className="text-lg font-semibold mb-2 text-gray-900 dark:text-gray-100">{children}</h2>,
+                                                                    h3: ({ children }) => <h3 className="text-base font-semibold mb-1 text-gray-900 dark:text-gray-100">{children}</h3>,
+                                                                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                                                                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                                                                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                                                                    li: ({ children }) => <li className="text-sm">{children}</li>,
+                                                                    strong: ({ children }) => <strong className="font-semibold text-gray-900 dark:text-gray-100">{children}</strong>,
+                                                                    em: ({ children }) => <em className="italic">{children}</em>,
+                                                                    code: ({ children }) => <code className="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs font-mono">{children}</code>,
+                                                                    pre: ({ children }) => <pre className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs font-mono overflow-x-auto mb-2">{children}</pre>,
+                                                                    blockquote: ({ children }) => <blockquote className="border-l-4 border-gray-300 pl-4 italic mb-2">{children}</blockquote>,
+                                                                    a: ({ href, children }) => (
+                                                                        <a 
+                                                                            href={href} 
+                                                                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                                                                            target="_blank" 
+                                                                            rel="noopener noreferrer"
+                                                                        >
+                                                                            {children}
+                                                                        </a>
+                                                                    ),
+                                                                    table: ({ children }) => (
+                                                                        <div className="overflow-x-auto mb-2">
+                                                                            <table className="min-w-full border-collapse border border-gray-300 dark:border-gray-600">
+                                                                                {children}
+                                                                            </table>
+                                                                        </div>
+                                                                    ),
+                                                                    th: ({ children }) => <th className="border border-gray-300 dark:border-gray-600 px-2 py-1 bg-gray-100 dark:bg-gray-800 font-semibold text-xs">{children}</th>,
+                                                                    td: ({ children }) => <td className="border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs">{children}</td>,
+                                                                }}
+                                                            >
+                                                                {message.content}
+                                                            </ReactMarkdown>
+                                                        ) : (
+                                                            <div className="whitespace-pre-wrap">{message.content}</div>
+                                                        )}
                                                     </div>
                                                     <div className="text-xs opacity-70 mt-1">
                                                         {formatMessageTime(message.created_at)}
