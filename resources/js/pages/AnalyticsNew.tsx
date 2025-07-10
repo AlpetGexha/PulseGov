@@ -238,7 +238,8 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                 {analytics.needs_ai_generation && (
                     <Alert className="bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
                         <Brain className="h-5 w-5 text-purple-500 mr-2" />
-                        <AlertDescription className="text-purple-800 dark:text-purple-200 flex-1">
+    <AlertDescription className="text-purple-800 dark:text-purple-200 flex-1">
+                        THE AI PROCESS TAKE 2 Minute to process
                             <span className="font-medium">Enhanced AI Analysis Available!</span> Generate AI-powered insights by clicking the "Generate AI Analysis" button above.
                         </AlertDescription>
                     </Alert>
