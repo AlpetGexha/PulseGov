@@ -135,7 +135,7 @@ export default function Analytics({ analytics }: AnalyticsProps) {
         try {
             setIsGeneratingAI(true);
             const response = await axios.post('/analytics/generate-ai');
-            
+
             // Extract progress key from the response or URL
             const key = response.data.progressKey || response.data.progress_key;
             setProgressKey(key);
@@ -211,8 +211,8 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                             onClick={handleGenerateAI}
                             disabled={isGeneratingAI || isLoading}
                             className={`bg-gradient-to-r ${
-                                analytics.needs_ai_generation 
-                                  ? 'from-purple-600 to-blue-700 hover:from-purple-700 hover:to-blue-800 ring-2 ring-purple-400' 
+                                analytics.needs_ai_generation
+                                  ? 'from-purple-600 to-blue-700 hover:from-purple-700 hover:to-blue-800 ring-2 ring-purple-400'
                                   : 'from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
                             } text-white ${analytics.needs_ai_generation ? 'animate-pulse' : ''}`}
                             title="Generate fresh AI analysis using OpenAI GPT-4"
@@ -256,7 +256,7 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                         </AlertDescription>
                     </Alert>
                 )}
-                
+
                 {/* AI Analysis Notice */}
                 {analytics.needs_ai_generation && (
                     <Alert className="bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
@@ -266,41 +266,6 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                         </AlertDescription>
                     </Alert>
                 )}
-
-                {/* Analytics Generation Controls */}
-                <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6 mb-6">
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-                                AI Analytics Generation
-                            </h2>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                Generate AI-powered insights from your feedback data
-                            </p>
-                        </div>
-                        <button
-                            onClick={startAnalysis}
-                            disabled={isGeneratingAI}
-                            className={`px-4 py-2 rounded-lg ${
-                                isGeneratingAI
-                                    ? 'bg-gray-300 cursor-not-allowed'
-                                    : 'bg-blue-600 hover:bg-blue-700'
-                            } text-white font-medium transition-colors`}
-                        >
-                            {isGeneratingAI ? 'Generating...' : 'Generate Analysis'}
-                        </button>
-                    </div>
-
-                    {/* Progress Tracker */}
-                    {progressKey && (
-                        <div className="mt-6">
-                            <ProgressTracker
-                                progressKey={progressKey}
-                                onComplete={handleAnalysisComplete}
-                            />
-                        </div>
-                    )}
-                </div>
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
