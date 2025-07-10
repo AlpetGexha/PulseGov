@@ -31,15 +31,10 @@ export function useTheme() {
         root.classList.remove('light', 'dark');
 
         // Apply theme
-        if (theme === 'system') {
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            root.classList.add(systemTheme);
-        } else {
-            root.classList.add(theme);
-        }
+ 
 
         // Store the preference
-        localStorage.setItem('theme', theme);
+        localStorage.setItem('theme', 'light');
         
         // For compatibility with Laravel's theme storage
         if (typeof window !== 'undefined') {

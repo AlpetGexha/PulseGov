@@ -249,11 +249,11 @@ export default function Welcome() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => setAppearance('light')}>
+                                        <DropdownMenuItem onClick={() =>localStorage.setItem('appearance', 'light')}>
                                             <Sun className="mr-2 h-4 w-4 text-[#2E79B5]" />
                                             <span>Light</span>
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setAppearance('dark')}>
+                                        <DropdownMenuItem onClick={() => localStorage.setItem('appearance', 'dark')}>
                                             <Moon className="mr-2 h-4 w-4 text-[#2E79B5]" />
                                             <span>Dark</span>
                                         </DropdownMenuItem>

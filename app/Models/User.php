@@ -60,4 +60,9 @@ final class User extends Authenticatable
     {
         return $this->hasMany(FeedbackStatus::class);
     }
+
+    public function isAdmin(): bool
+    {
+        return true;
+    }
 }

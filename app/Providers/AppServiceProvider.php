@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
+ 
 
 final class AppServiceProvider extends ServiceProvider
 {
@@ -27,6 +30,10 @@ final class AppServiceProvider extends ServiceProvider
         $this->configurateModels();
         $this->configurateCommands();
         $this->configurateURL();
+
+          Gate::define('viewPulse', function (User $user) {
+            return $user->isAdmin();
+        });
     }
 
     private function configurateModels(): void

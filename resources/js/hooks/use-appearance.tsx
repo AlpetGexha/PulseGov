@@ -39,7 +39,7 @@ const handleSystemThemeChange = () => {
 };
 
 export function initializeTheme() {
-    const savedAppearance = (localStorage.getItem('appearance') as Appearance) || 'light';
+    const savedAppearance = (localStorage.getItem('appearance') as Appearance) || 'system';
 
     applyTheme(savedAppearance);
 
@@ -54,12 +54,12 @@ export function useAppearance() {
         setAppearance(mode);
 
         // Store in localStorage for client-side persistence...
-        localStorage.setItem('appearance', mode);
+        localStorage.setItem('appearance', 'light');
 
         // Store in cookie for SSR...
-        setCookie('appearance', mode);
+        setCookie('appearance', 'light');
 
-        applyTheme(mode);
+        applyTheme('light');
     }, []);
 
     useEffect(() => {
