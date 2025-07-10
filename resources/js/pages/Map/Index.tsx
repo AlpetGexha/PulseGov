@@ -2,6 +2,7 @@ import { Head } from '@inertiajs/react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { useState, useEffect } from 'react';
 import { Icon } from 'leaflet';
+import AppLayout from '@/layouts/app-layout';
 import 'leaflet/dist/leaflet.css';
 
 interface FeedbackLocation {
@@ -71,17 +72,10 @@ export default function Index({ feedbacks }: Props) {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-            <Head title="Feedback Map" />
+                <AppLayout>
+                    <Head title="Community Feedback" />
 
             <div className="flex flex-col h-screen">
-                {/* Header */}
-                <div className="bg-white dark:bg-gray-800 shadow px-4 py-3">
-                    <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        Citizen Feedback Map
-                    </h1>
-                </div>
-
                 {/* Main Content */}
                 <div className="flex flex-1 overflow-hidden">
                     {/* Map Container */}
@@ -96,7 +90,7 @@ export default function Index({ feedbacks }: Props) {
                                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                             />
                             <MapCenter lat={mapCenter[0]} lng={mapCenter[1]} />
-                            
+
                             {feedbacks.map((feedback) => (
                                 <Marker
                                     key={feedback.id}
@@ -223,6 +217,6 @@ export default function Index({ feedbacks }: Props) {
                     )}
                 </div>
             </div>
-        </div>
+        </AppLayout>
     );
 }
