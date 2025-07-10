@@ -14,7 +14,7 @@ abstract class FormRequest extends BaseFormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
-    final public function authorize(): bool
+    public function authorize(): bool
     {
         return true;
     }
