@@ -26,6 +26,7 @@ final class DatabaseSeeder extends Seeder
         // Run the feedback seeder
         $this->call([
             FeedbackSeeder::class,
+            GjakovaFeedbackSeeder::class,
         ]);
     }
 }

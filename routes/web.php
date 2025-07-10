@@ -19,6 +19,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('analytics/generate-ai', [App\Http\Controllers\AnalyticsController::class, 'generateAI'])->name('analytics.generate-ai');
     Route::post('analytics/clear-cache', [App\Http\Controllers\AnalyticsController::class, 'clearCache'])->name('analytics.clear-cache');
 
+    // Map Route
+    Route::get('map', [App\Http\Controllers\MapController::class, 'index'])->name('map.index');
+
     // Chat Routes
     Route::get('chat', [App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
     Route::post('chat/conversations', [App\Http\Controllers\ChatController::class, 'createConversation'])->name('chat.conversations.create');

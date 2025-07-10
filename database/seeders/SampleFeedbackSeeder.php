@@ -13,12 +13,6 @@ class SampleFeedbackSeeder extends Seeder
 {
     public function run(): void
     {
-        // Get or create a user
-        $user = User::first() ?? User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
         $feedbackSamples = [
             [
                 'title' => 'Large Pothole on Main Street',
@@ -104,7 +98,7 @@ class SampleFeedbackSeeder extends Seeder
 
         foreach ($feedbackSamples as $sample) {
             Feedback::create(array_merge($sample, [
-                'user_id' => $user->id,
+                'user_id' => 1,
                 'status' => FeedbackStatus::UNDER_REVIEW,
                 'created_at' => now()->subDays(rand(1, 30)),
                 'updated_at' => now()->subDays(rand(1, 30)),
