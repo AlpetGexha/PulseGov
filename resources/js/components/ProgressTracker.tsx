@@ -53,10 +53,10 @@ export default function ProgressTracker({ progressKey, onComplete }: Props) {
         <div className="space-y-4">
             {/* Progress Bar */}
             <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                <div 
+                <div
                     className={`h-2.5 rounded-full transition-all duration-500 ${
-                        progress.status === 'failed' 
-                            ? 'bg-red-600' 
+                        progress.status === 'failed'
+                            ? 'bg-red-600'
                             : progress.status === 'completed'
                                 ? 'bg-green-600'
                                 : 'bg-blue-600'

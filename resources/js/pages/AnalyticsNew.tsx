@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import axios from 'axios';
 
 import {
     TrendingUp,
@@ -26,7 +25,6 @@ import {
     Lightbulb,
     RefreshCw
 } from 'lucide-react';
-import ProgressTracker from '@/Components/ProgressTracker';
 
 interface FeedbackTopic {
     id: string;
@@ -111,7 +109,6 @@ export default function Analytics({ analytics }: AnalyticsProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isGeneratingAI, setIsGeneratingAI] = useState(false);
     const [activeTab, setActiveTab] = useState('priorities');
-    const [progressKey, setProgressKey] = useState<string | null>(null);
 
     const handleRefresh = async () => {
         setIsLoading(true);
@@ -129,26 +126,6 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                 router.reload({ only: ['analytics'] });
             }
         });
-    };
-
-    const startAnalysis = async () => {
-        try {
-            setIsGeneratingAI(true);
-            const response = await axios.post('/analytics/generate-ai');
-
-            // Extract progress key from the response or URL
-            const key = response.data.progressKey || response.data.progress_key;
-            setProgressKey(key);
-        } catch (error) {
-            console.error('Failed to start analysis:', error);
-        }
-    };
-
-    const handleAnalysisComplete = () => {
-        setIsGeneratingAI(false);
-        setProgressKey(null);
-        // Optionally reload the page or fetch new data
-        window.location.reload();
     };
 
     const getPriorityColor = (score: number) => {
@@ -262,7 +239,6 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                     <Alert className="bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
                         <Brain className="h-5 w-5 text-purple-500 mr-2" />
                         <AlertDescription className="text-purple-800 dark:text-purple-200 flex-1">
-                            THE PROCESS NEED 2 min to process after pressing the button so plz wiat and refresh the page after 2 min
                             <span className="font-medium">Enhanced AI Analysis Available!</span> Generate AI-powered insights by clicking the "Generate AI Analysis" button above.
                         </AlertDescription>
                     </Alert>
