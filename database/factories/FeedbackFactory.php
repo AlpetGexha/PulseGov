@@ -1,17 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enum\FeedbackSentiment;
 use App\Enum\FeedbackStatus;
 use App\Enum\FeedbackType;
 use App\Enum\UrgencyLevel;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\Feedback;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-class FeedbackFactory extends Factory
+final class FeedbackFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
@@ -36,7 +38,7 @@ class FeedbackFactory extends Factory
             'sentiment' => fake()->randomElement(FeedbackSentiment::cases()),
             'status' => fake()->randomElement(FeedbackStatus::cases()),
             'feedback_type' => fake()->randomElement(FeedbackType::cases()),
-            'tracking_code' => strtoupper(Str::random(8)),
+            'tracking_code' => mb_strtoupper(Str::random(8)),
             'urgency_level' => fake()->randomElement(UrgencyLevel::cases()),
             'intent' => fake()->word(),
             'topic_cluster' => fake()->word(),

@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Agents\FeedbackAgentChatBot;
+use Exception;
 use Illuminate\Console\Command;
 
-class StreamFeedbackAgentChat extends Command
+final class StreamFeedbackAgentChat extends Command
 {
     /**
      * The name and signature of the console command.
@@ -45,7 +48,7 @@ class StreamFeedbackAgentChat extends Command
             $this->info('Query processing completed successfully.');
 
             return self::SUCCESS;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error("Error processing query: {$e->getMessage()}");
             $this->newLine();
             $this->line($e->getTraceAsString());

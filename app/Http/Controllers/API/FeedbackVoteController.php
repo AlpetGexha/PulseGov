@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\API;
 
 use App\Enum\VoteType;
@@ -10,13 +12,10 @@ use App\Models\FeedbackVote;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
-class FeedbackVoteController extends Controller
+final class FeedbackVoteController extends Controller
 {
     /**
      * Store or update a vote for feedback.
-     *
-     * @param FeedbackVoteRequest $request
-     * @return JsonResponse
      */
     public function vote(FeedbackVoteRequest $request): JsonResponse
     {
@@ -32,17 +31,19 @@ class FeedbackVoteController extends Controller
             // If same vote type, remove it (toggle off)
             if ($vote->vote->value === $request->vote) {
                 $vote->delete();
+
                 return response()->json([
                     'message' => 'Vote removed successfully',
-                    'voteStatus' => null
+                    'voteStatus' => null,
                 ]);
             }
 
             // If different vote type, update it
             $vote->update(['vote' => $request->vote]);
+
             return response()->json([
                 'message' => 'Vote updated successfully',
-                'voteStatus' => $request->vote
+                'voteStatus' => $request->vote,
             ]);
         }
 
@@ -55,15 +56,12 @@ class FeedbackVoteController extends Controller
 
         return response()->json([
             'message' => 'Vote recorded successfully',
-            'voteStatus' => $request->vote
+            'voteStatus' => $request->vote,
         ], 201);
     }
 
     /**
      * Get vote counts for feedback.
-     *
-     * @param Feedback $feedback
-     * @return JsonResponse
      */
     public function getVoteCounts(Feedback $feedback): JsonResponse
     {

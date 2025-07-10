@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Jobs\ProcessFeedbackAIAnalysis;
 use App\Models\Feedback;
 use Illuminate\Console\Command;
 
-class AnalyzeAllFeedback extends Command
+final class AnalyzeAllFeedback extends Command
 {
     /**
      * The name and signature of the console command.
@@ -29,7 +31,7 @@ class AnalyzeAllFeedback extends Command
     {
         $query = Feedback::query();
 
-        if (!$this->option('force')) {
+        if (! $this->option('force')) {
             // Only get feedback without analysis
             $query->whereDoesntHave('aIAnalysis');
         }
@@ -38,6 +40,7 @@ class AnalyzeAllFeedback extends Command
 
         if ($feedbackCount === 0) {
             $this->info('No unanalyzed feedback found.');
+
             return 0;
         }
 

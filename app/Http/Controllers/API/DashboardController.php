@@ -1,23 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\API;
 
 use App\Enum\FeedbackSentiment;
-use App\Enum\FeedbackStatus;
 use App\Enum\FeedbackType;
 use App\Http\Controllers\Controller;
 use App\Models\Feedback;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class DashboardController extends Controller
+final class DashboardController extends Controller
 {
     /**
      * Get feedback statistics and insights.
-     *
-     * @return JsonResponse
      */
     public function getFeedbackStats(): JsonResponse
     {
@@ -90,6 +88,7 @@ class DashboardController extends Controller
             ->flatMap(function ($item) {
                 // Extract tags from JSON array
                 $tags = json_decode($item->tags ?? '[]');
+
                 return is_array($tags) ? $tags : [];
             })
             ->countBy()
@@ -114,8 +113,6 @@ class DashboardController extends Controller
 
     /**
      * Get summary of recent activity.
-     *
-     * @return JsonResponse
      */
     public function getRecentActivity(): JsonResponse
     {

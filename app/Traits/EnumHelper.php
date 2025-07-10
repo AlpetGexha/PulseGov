@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Traits;
 
 trait EnumHelper
@@ -12,7 +14,7 @@ trait EnumHelper
     public static function options(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn($case) => [$case->value => $case->label()])
+            ->mapWithKeys(fn ($case) => [$case->value => $case->label()])
             ->toArray();
     }
 
@@ -24,15 +26,12 @@ trait EnumHelper
     public static function values(): array
     {
         return collect(self::cases())
-            ->map(fn($case) => $case->value)
+            ->map(fn ($case) => $case->value)
             ->toArray();
     }
 
     /**
      * Find enum case by value.
-     *
-     * @param string|null $value
-     * @return static|null
      */
     public static function tryFromValue(?string $value): ?static
     {
@@ -45,8 +44,6 @@ trait EnumHelper
 
     /**
      * Get label for the enum value.
-     *
-     * @return string
      */
     public function label(): string
     {

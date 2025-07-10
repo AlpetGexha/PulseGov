@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Enum;
 
 use App\Traits\EnumHelper;
@@ -13,12 +15,10 @@ enum UserRole: string
 
     /**
      * Get a friendly, displayable name for the enum value.
-     *
-     * @return string
      */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ADMIN => 'Administrator',
             self::CITIZEN => 'Citizen',
         };

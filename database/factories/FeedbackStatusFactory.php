@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enum\FeedbackStatus as FeedbackStatusEnum;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\Feedback;
 use App\Models\FeedbackStatus;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class FeedbackStatusFactory extends Factory
+final class FeedbackStatusFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.

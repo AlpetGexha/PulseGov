@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Enum\FeedbackSentiment;
@@ -7,13 +9,14 @@ use App\Enum\UrgencyLevel;
 use App\Jobs\GenerateAIAnalyticsJob;
 use App\Models\Feedback;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class AnalyticsController extends Controller
+final class AnalyticsController extends Controller
 {
     /**
      * Display the analytics dashboard.
@@ -21,9 +24,9 @@ class AnalyticsController extends Controller
     public function index()
     {
         // Check if user is authorized
-   //     if (Auth::user()?->role !== 'admin') {
-     //       return redirect()->back()->with('error', 'You are not authorized to access this page.');
-       // }
+        //     if (Auth::user()?->role !== 'admin') {
+        //       return redirect()->back()->with('error', 'You are not authorized to access this page.');
+        // }
 
         // Get cached analytics data or generate fresh data
         $analytics = $this->getCachedAnalyticsData();
@@ -31,6 +34,95 @@ class AnalyticsController extends Controller
         return Inertia::render('AnalyticsNew', [
             'analytics' => $analytics,
         ]);
+    }
+
+    /**
+     * Clear cached analytics data.
+     */
+    public function clearCache()
+    {
+        try {
+            $cacheKey = 'ai_analytics_data';
+            Cache::forget($cacheKey);
+
+            Cache::forget('ai_analytics_status');
+
+            Log::info('Analytics cache cleared', [
+                'cache_key' => $cacheKey,
+                'user_id' => Auth::id(),
+            ]);
+
+            return redirect()->back()->with('success', 'Cache cleared successfully! Next page load will generate fresh data.');
+
+        } catch (Exception $e) {
+            Log::error('Error clearing analytics cache', [
+                'error' => $e->getMessage(),
+                'user_id' => Auth::id(),
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to clear cache: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Generate AI analysis on demand and cache the results.
+     */
+    public function generateAI()
+    {
+        try {
+            Log::info('=== Starting AI Analysis Generation Request ===', [
+                'user_id' => Auth::id(),
+                'timestamp' => now(),
+            ]);
+
+            // Check OpenAI configuration
+            if (empty(config('openai.api_key'))) {
+                Log::error('OpenAI API key is not configured');
+
+                return redirect()->back()->with('error', 'OpenAI API key is not configured. Please check your environment settings.');
+            }
+
+            // Check for existing processing status
+            $analysisStatus = $this->getAnalysisStatus();
+            if ($analysisStatus && $analysisStatus['status'] === 'processing') {
+                return redirect()->back()->with('info', 'Analysis is already in progress. Started at ' . Carbon::parse($analysisStatus['started_at'])->toTimeString() . '. Please wait for it to complete.');
+            }
+
+            // Set initial processing status
+            Cache::put('ai_analytics_status', [
+                'status' => 'processing',
+                'message' => 'Starting AI analysis...',
+                'started_at' => now()->toISOString(),
+                'progress' => 0,
+            ], 3600);
+
+            // Generate a unique progress key
+            $progressKey = 'analytics_progress_' . uniqid();
+
+            // Dispatch the background job with progress tracking
+            dispatch((new GenerateAIAnalyticsJob(Auth::id(), $progressKey))->onQueue('analytics'));
+
+            Log::info('AI analysis job dispatched', [
+                'user_id' => Auth::id(),
+                'timestamp' => now(),
+            ]);
+
+            return redirect()->back()->with('success', 'AI analysis started! The process will run in the background and results will be available shortly.');
+        } catch (Exception $e) {
+            Log::error('Error starting AI analysis', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            // Update status to failed
+            Cache::put('ai_analytics_status', [
+                'status' => 'failed',
+                'message' => 'Failed to start analysis: ' . $e->getMessage(),
+                'failed_at' => now()->toISOString(),
+            ], 3600);
+
+            return redirect()->back()->with('error', 'Failed to start AI analysis. Please try again later.');
+        }
     }
 
     /**
@@ -52,7 +144,7 @@ class AnalyticsController extends Controller
 
             Log::info('Using cached analytics data', [
                 'cache_key' => $cacheKey,
-                'generated_at' => $cachedData['generated_at']
+                'generated_at' => $cachedData['generated_at'],
             ]);
 
             return $cachedData;
@@ -68,7 +160,7 @@ class AnalyticsController extends Controller
         $fallbackData['cache_expires_at'] = now()->addSeconds($cacheDuration)->toISOString();
 
         Log::info('Using fallback analytics data (no AI)', [
-            'reason' => 'No cached data available'
+            'reason' => 'No cached data available',
         ]);
 
         return $fallbackData;
@@ -80,7 +172,7 @@ class AnalyticsController extends Controller
     private function getAnalysisStatus(): ?array
     {
         $status = Cache::get('ai_analytics_status');
-        if (!$status) {
+        if (! $status) {
             return null;
         }
 
@@ -90,99 +182,12 @@ class AnalyticsController extends Controller
             if ($minutesAgo >= 10) {
                 // Reset status if it's been too long
                 Cache::forget('ai_analytics_status');
+
                 return null;
             }
         }
 
         return $status;
-    }
-
-    /**
-     * Clear cached analytics data.
-     */
-    public function clearCache()
-    {
-        try {
-            $cacheKey = 'ai_analytics_data';
-            Cache::forget($cacheKey);
-
-            Cache::forget('ai_analytics_status');
-
-            Log::info('Analytics cache cleared', [
-                'cache_key' => $cacheKey,
-                'user_id' => Auth::id()
-            ]);
-
-            return redirect()->back()->with('success', 'Cache cleared successfully! Next page load will generate fresh data.');
-
-        } catch (\Exception $e) {
-            Log::error('Error clearing analytics cache', [
-                'error' => $e->getMessage(),
-                'user_id' => Auth::id()
-            ]);
-
-            return redirect()->back()->with('error', 'Failed to clear cache: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Generate AI analysis on demand and cache the results.
-     */
-    public function generateAI()
-    {
-        try {
-            Log::info('=== Starting AI Analysis Generation Request ===', [
-                'user_id' => Auth::id(),
-                'timestamp' => now(),
-            ]);
-
-            // Check OpenAI configuration
-            if (empty(config('openai.api_key'))) {
-                Log::error('OpenAI API key is not configured');
-                return redirect()->back()->with('error', 'OpenAI API key is not configured. Please check your environment settings.');
-            }
-
-            // Check for existing processing status
-            $analysisStatus = $this->getAnalysisStatus();
-            if ($analysisStatus && $analysisStatus['status'] === 'processing') {
-                return redirect()->back()->with('info', 'Analysis is already in progress. Started at ' . Carbon::parse($analysisStatus['started_at'])->toTimeString() . '. Please wait for it to complete.');
-            }
-
-            // Set initial processing status
-            Cache::put('ai_analytics_status', [
-                'status' => 'processing',
-                'message' => 'Starting AI analysis...',
-                'started_at' => now()->toISOString(),
-                'progress' => 0
-            ], 3600);
-
-            // Generate a unique progress key
-            $progressKey = 'analytics_progress_' . uniqid();
-            
-            // Dispatch the background job with progress tracking
-            dispatch((new GenerateAIAnalyticsJob(Auth::id(), $progressKey))->onQueue('analytics'));
-
-            Log::info('AI analysis job dispatched', [
-                'user_id' => Auth::id(),
-                'timestamp' => now()
-            ]);
-
-            return redirect()->back()->with('success', 'AI analysis started! The process will run in the background and results will be available shortly.');
-        } catch (\Exception $e) {
-            Log::error('Error starting AI analysis', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-
-            // Update status to failed
-            Cache::put('ai_analytics_status', [
-                'status' => 'failed',
-                'message' => 'Failed to start analysis: ' . $e->getMessage(),
-                'failed_at' => now()->toISOString()
-            ], 3600);
-
-            return redirect()->back()->with('error', 'Failed to start AI analysis. Please try again later.');
-        }
     }
 
     /**

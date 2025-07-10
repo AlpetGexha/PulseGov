@@ -1,18 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Actions\StreamAnalyzeFeedback;
 use App\Models\Feedback;
 use Illuminate\Console\Command;
 
-class StreamAnalyzeFeedbackCommand extends Command
+final class StreamAnalyzeFeedbackCommand extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
-     */    protected $signature = 'analyze:feedback-stream
+     */ protected $signature = 'analyze:feedback-stream
                             {feedback_id? : The ID of the feedback to analyze}
                             {--real-time : Use real-time streaming of AI thoughts}';
 
@@ -35,8 +37,9 @@ class StreamAnalyzeFeedbackCommand extends Command
             // Process a single feedback item
             $feedback = Feedback::find($feedbackId);
 
-            if (!$feedback) {
+            if (! $feedback) {
                 $this->error("Feedback with ID {$feedbackId} not found.");
+
                 return self::FAILURE;
             }
 
@@ -49,12 +52,13 @@ class StreamAnalyzeFeedbackCommand extends Command
                 $response = $analyzer->handleStream($feedback);
             }
             $response->send();
-              } else {
+        } else {
             // Process unanalyzed feedback items
             $unanalyzed = Feedback::whereDoesntHave('aIAnalysis')->limit(5)->get();
 
             if ($unanalyzed->isEmpty()) {
-                $this->info("No unanalyzed feedback found.");
+                $this->info('No unanalyzed feedback found.');
+
                 return self::SUCCESS;
             }
 
@@ -77,7 +81,7 @@ class StreamAnalyzeFeedbackCommand extends Command
                 $count++;
             }
 
-            $this->info("Analysis complete for all feedback items.");
+            $this->info('Analysis complete for all feedback items.');
         }
 
         return self::SUCCESS;

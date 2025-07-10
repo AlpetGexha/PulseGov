@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Category extends Model
+final class Category extends Model
 {
     use HasFactory;
 
@@ -20,6 +22,11 @@ class Category extends Model
         'description',
     ];
 
+    public function feedbackCategories(): HasMany
+    {
+        return $this->hasMany(FeedbackCategory::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -30,10 +37,5 @@ class Category extends Model
         return [
             'id' => 'integer',
         ];
-    }
-
-    public function feedbackCategories(): HasMany
-    {
-        return $this->hasMany(FeedbackCategory::class);
     }
 }

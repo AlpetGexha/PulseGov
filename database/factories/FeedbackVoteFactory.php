@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Enum\VoteType;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\Feedback;
 use App\Models\FeedbackVote;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class FeedbackVoteFactory extends Factory
+final class FeedbackVoteFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.

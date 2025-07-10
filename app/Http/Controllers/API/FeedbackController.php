@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\API;
 
 use App\Enum\FeedbackStatus;
@@ -15,7 +17,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
-class FeedbackController extends Controller
+final class FeedbackController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -65,7 +67,6 @@ class FeedbackController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param FeedbackRequest $request
      * @return JsonResponse
      */
     public function store(FeedbackRequest $request)
@@ -83,7 +84,7 @@ class FeedbackController extends Controller
         ]);
 
         // Trigger AI analysis job to process the feedback
-        \App\Jobs\ProcessFeedbackAIAnalysis::dispatch($feedback);
+        ProcessFeedbackAIAnalysis::dispatch($feedback);
 
         return response()->json([
             'data' => new FeedbackResource($feedback),
@@ -94,7 +95,6 @@ class FeedbackController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param string $id
      * @return JsonResponse
      */
     public function show(string $id)
@@ -120,8 +120,6 @@ class FeedbackController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param FeedbackRequest $request
-     * @param string $id
      * @return JsonResponse
      */
     public function update(FeedbackRequest $request, string $id)
@@ -139,7 +137,7 @@ class FeedbackController extends Controller
         if (Auth::user()->role !== 'admin') {
             // Regular users can only update title, body, location, service
             $feedback->update($request->only([
-                'title', 'body', 'location', 'service'
+                'title', 'body', 'location', 'service',
             ]));
         } else {
             // Admins can update all fields
@@ -155,7 +153,6 @@ class FeedbackController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param string $id
      * @return JsonResponse
      */
     public function destroy(string $id)
@@ -177,23 +174,8 @@ class FeedbackController extends Controller
     }
 
     /**
-     * Generate a unique tracking code for feedback.
-     *
-     * @return string
-     */
-    private function generateTrackingCode(): string
-    {
-        $prefix = 'FB-';
-        $randomString = Str::random(8);
-        $timestamp = now()->format('Ymd');
-
-        return $prefix . $timestamp . '-' . strtoupper($randomString);
-    }
-
-    /**
      * Analyze feedback using AI.
      *
-     * @param string $id
      * @return JsonResponse
      */
     public function analyze(string $id)
@@ -214,5 +196,17 @@ class FeedbackController extends Controller
         return response()->json([
             'message' => 'Feedback analysis has been queued',
         ]);
+    }
+
+    /**
+     * Generate a unique tracking code for feedback.
+     */
+    private function generateTrackingCode(): string
+    {
+        $prefix = 'FB-';
+        $randomString = Str::random(8);
+        $timestamp = now()->format('Ymd');
+
+        return $prefix . $timestamp . '-' . mb_strtoupper($randomString);
     }
 }

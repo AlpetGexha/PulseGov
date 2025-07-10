@@ -1,14 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests;
 
 use App\Enum\FeedbackSentiment;
 use App\Enum\FeedbackStatus;
-use App\Enum\FeedbackType;
 use App\Enum\UrgencyLevel;
 use Illuminate\Foundation\Http\FormRequest;
 
-class FeedbackRequest extends FormRequest
+final class FeedbackRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -21,7 +22,7 @@ class FeedbackRequest extends FormRequest
             // 'user_id' => $this->integerRule(),
             'title' => ['required', 'string', 'max:255'],
             'body' => ['required', 'string', 'min:10'],
-            'location' => ['string','nullable'],
+            'location' => ['string', 'nullable'],
             'service' => ['string', 'nullable'],
             'feedback_type' => ['required', 'string', 'in:suggestion,complaint,question,compliment'],
             'is_public' => ['boolean'],

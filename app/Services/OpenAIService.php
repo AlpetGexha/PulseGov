@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Services;
 
-class OpenAIService
+final class OpenAIService
 {
     public function __construct()
     {

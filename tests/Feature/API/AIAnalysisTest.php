@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Actions\AnalyzeFeedback;
 use App\Enum\FeedbackSentiment;
 use App\Enum\FeedbackType;
@@ -16,12 +18,12 @@ use OpenAI\Responses\Chat\CreateResponse;
 beforeEach(function () {
     // Create admin user
     $this->adminUser = User::factory()->create([
-        'role' => 'admin'
+        'role' => 'admin',
     ]);
 
     // Create regular user
     $this->user = User::factory()->create([
-        'role' => 'citizen'
+        'role' => 'citizen',
     ]);
 
     // Create a feedback item
@@ -43,7 +45,7 @@ test('admin can trigger AI analysis of feedback', function () {
     // Assert response
     $response->assertStatus(200)
         ->assertJson([
-            'message' => 'Feedback analysis has been queued'
+            'message' => 'Feedback analysis has been queued',
         ]);
 
     // Assert job was dispatched
@@ -76,7 +78,7 @@ test('feedback analysis job processes correctly', function () {
         'feedback_type' => 'suggestion',
         'tags' => ['park', 'benches', 'lighting', 'safety'],
         'department' => 'Parks and Recreation',
-        'summary' => 'User suggests adding more benches and better lighting in the local park.'
+        'summary' => 'User suggests adding more benches and better lighting in the local park.',
     ];
 
     // Create a mock for the OpenAI service
@@ -87,8 +89,8 @@ test('feedback analysis job processes correctly', function () {
         $responseMock = Mockery::mock(CreateResponse::class);
         $choiceMock = (object) [
             'message' => (object) [
-                'content' => json_encode($mockResponse)
-            ]
+                'content' => json_encode($mockResponse),
+            ],
         ];
         $responseMock->choices = [(object) ['choice' => $choiceMock]];
 
@@ -146,7 +148,7 @@ test('ai analysis data is included in feedback response', function () {
             'data' => [
                 'ai_analysis' => [
                     'sentiment' => [
-                        'value', 'label', 'color'
+                        'value', 'label', 'color',
                     ],
                     'urgency_level',
                     'department_assigned',
@@ -155,8 +157,8 @@ test('ai analysis data is included in feedback response', function () {
                     'summary',
                     'suggested_tags',
                     'department_suggestion',
-                    'analysis_date'
-                ]
-            ]
+                    'analysis_date',
+                ],
+            ],
         ]);
 });

@@ -1,15 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FeedbackCommentRequest;
-use App\Models\FeedbackComment;
 use App\Models\Feedback;
+use App\Models\FeedbackComment;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class FeedbackCommentController extends Controller
+final class FeedbackCommentController extends Controller
 {
     use AuthorizesRequests;
 
@@ -66,7 +68,7 @@ class FeedbackCommentController extends Controller
         $this->authorize('update', $comment);
 
         $comment->update([
-            'is_pinned' => !$comment->is_pinned,
+            'is_pinned' => ! $comment->is_pinned,
         ]);
 
         return back()->with('success', $comment->is_pinned ?

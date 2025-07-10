@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enum\FeedbackSentiment;
 use App\Models\Feedback;
 use Illuminate\Database\Migrations\Migration;
@@ -8,9 +10,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('a_i_analyses', function (Blueprint $table) {
@@ -25,9 +24,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('a_i_analyses');

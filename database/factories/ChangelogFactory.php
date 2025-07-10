@@ -1,12 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\Changelog;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ChangelogFactory extends Factory
+final class ChangelogFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.

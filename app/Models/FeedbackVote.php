@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enum\VoteType;
@@ -7,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class FeedbackVote extends Model
+final class FeedbackVote extends Model
 {
     use HasFactory;
 
@@ -21,6 +23,16 @@ class FeedbackVote extends Model
         'user_id',
         'vote',
     ];
+
+    public function feedback(): BelongsTo
+    {
+        return $this->belongsTo(Feedback::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -36,15 +48,5 @@ class FeedbackVote extends Model
             'vote' => VoteType::class,
             'created_at' => 'timestamp',
         ];
-    }
-
-    public function feedback(): BelongsTo
-    {
-        return $this->belongsTo(Feedback::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }

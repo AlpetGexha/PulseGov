@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Enum\VoteType;
 use App\Http\Requests\FeedbackVoteRequest;
-use App\Models\FeedbackVote;
 use App\Models\Feedback;
+use App\Models\FeedbackVote;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 
-class FeedbackVoteController extends Controller
+final class FeedbackVoteController extends Controller
 {
     /**
      * Store or update a vote for feedback.
@@ -31,11 +34,13 @@ class FeedbackVoteController extends Controller
                 // If same vote type, remove it (toggle off)
                 if ($vote->vote->value === $validated['vote']) {
                     $vote->delete();
+
                     return back()->with('success', 'Vote removed successfully');
                 }
 
                 // If different vote type, update it
                 $vote->update(['vote' => $validated['vote']]);
+
                 return back()->with('success', 'Vote updated successfully');
             }
 
@@ -47,7 +52,7 @@ class FeedbackVoteController extends Controller
             ]);
 
             return back()->with('success', 'Vote recorded successfully');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return back()->with('error', 'Failed to record vote: ' . $e->getMessage());
         }
     }

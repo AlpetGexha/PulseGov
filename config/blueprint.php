@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
 
     /*
@@ -155,23 +157,23 @@ return [
     |
     */
     'generators' => [
-        'controller' => \Blueprint\Generators\ControllerGenerator::class,
-        'factory' => \Blueprint\Generators\FactoryGenerator::class,
-        'migration' => \Blueprint\Generators\MigrationGenerator::class,
-        'model' => \Blueprint\Generators\ModelGenerator::class,
-        'route' => \Blueprint\Generators\RouteGenerator::class,
-        'seeder' => \Blueprint\Generators\SeederGenerator::class,
-        'test' => \Blueprint\Generators\PhpUnitTestGenerator::class,
+        'controller' => Blueprint\Generators\ControllerGenerator::class,
+        'factory' => Blueprint\Generators\FactoryGenerator::class,
+        'migration' => Blueprint\Generators\MigrationGenerator::class,
+        'model' => Blueprint\Generators\ModelGenerator::class,
+        'route' => Blueprint\Generators\RouteGenerator::class,
+        'seeder' => Blueprint\Generators\SeederGenerator::class,
+        'test' => Blueprint\Generators\PhpUnitTestGenerator::class,
         // 'test' => \Blueprint\Generators\PestTestGenerator::class,
-        'event' => \Blueprint\Generators\Statements\EventGenerator::class,
-        'form_request' => \Blueprint\Generators\Statements\FormRequestGenerator::class,
-        'job' => \Blueprint\Generators\Statements\JobGenerator::class,
-        'mail' => \Blueprint\Generators\Statements\MailGenerator::class,
-        'notification' => \Blueprint\Generators\Statements\NotificationGenerator::class,
-        'resource' => \Blueprint\Generators\Statements\ResourceGenerator::class,
-        'view' => \Blueprint\Generators\Statements\ViewGenerator::class,
-        'inertia_page' => \Blueprint\Generators\Statements\InertiaPageGenerator::class,
-        'policy' => \Blueprint\Generators\PolicyGenerator::class,
+        'event' => Blueprint\Generators\Statements\EventGenerator::class,
+        'form_request' => Blueprint\Generators\Statements\FormRequestGenerator::class,
+        'job' => Blueprint\Generators\Statements\JobGenerator::class,
+        'mail' => Blueprint\Generators\Statements\MailGenerator::class,
+        'notification' => Blueprint\Generators\Statements\NotificationGenerator::class,
+        'resource' => Blueprint\Generators\Statements\ResourceGenerator::class,
+        'view' => Blueprint\Generators\Statements\ViewGenerator::class,
+        'inertia_page' => Blueprint\Generators\Statements\InertiaPageGenerator::class,
+        'policy' => Blueprint\Generators\PolicyGenerator::class,
     ],
 
 ];

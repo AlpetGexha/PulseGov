@@ -1,19 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Enum\FeedbackSentiment;
 use App\Enum\FeedbackStatus;
 use App\Enum\FeedbackType;
 use App\Enum\UrgencyLevel;
 use App\Http\Requests\FeedbackRequest;
 use App\Models\Feedback;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
-class FeedbackController extends Controller
+final class FeedbackController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -67,16 +67,16 @@ class FeedbackController extends Controller
             'votes',
             'comments' => function ($query) {
                 $query->with(['user', 'replies.user'])
-                      ->whereNull('parent_id')
-                      ->latest();
-            }
+                    ->whereNull('parent_id')
+                    ->latest();
+            },
         ]);
 
         return Inertia::render('Feedback/Show', [
             'feedback' => $feedback,
             'statuses' => FeedbackStatus::options(),
-            'statusColors' => collect(FeedbackStatus::cases())->mapWithKeys(fn($status) => [$status->value => $status->color()])->toArray(),
-            'statusIcons' => collect(FeedbackStatus::cases())->mapWithKeys(fn($status) => [$status->value => $status->icon()])->toArray(),
+            'statusColors' => collect(FeedbackStatus::cases())->mapWithKeys(fn ($status) => [$status->value => $status->color()])->toArray(),
+            'statusIcons' => collect(FeedbackStatus::cases())->mapWithKeys(fn ($status) => [$status->value => $status->icon()])->toArray(),
         ]);
     }
 

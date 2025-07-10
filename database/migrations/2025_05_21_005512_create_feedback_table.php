@@ -1,18 +1,16 @@
 <?php
 
-use App\Enum\FeedbackSentiment;
+declare(strict_types=1);
+
 use App\Enum\FeedbackStatus;
 use App\Enum\FeedbackType;
-use App\Enum\UrgencyLevel;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class () extends Migration {
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('feedback', function (Blueprint $table) {
@@ -40,9 +38,6 @@ return new class () extends Migration {
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('feedback');

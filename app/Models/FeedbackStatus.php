@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enum\FeedbackStatus as FeedbackStatusEnum;
@@ -7,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class FeedbackStatus extends Model
+final class FeedbackStatus extends Model
 {
     use HasFactory;
 
@@ -25,6 +27,16 @@ class FeedbackStatus extends Model
         'user_id',
     ];
 
+    public function feedback(): BelongsTo
+    {
+        return $this->belongsTo(Feedback::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -39,15 +51,5 @@ class FeedbackStatus extends Model
             'changed_at' => 'timestamp',
             'user_id' => 'integer',
         ];
-    }
-
-    public function feedback(): BelongsTo
-    {
-        return $this->belongsTo(Feedback::class);
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 }

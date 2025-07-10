@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\API;
 
 use App\Http\Requests\FormRequest;
 
-class FeedbackCommentRequest extends FormRequest
+final class FeedbackCommentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

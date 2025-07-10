@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
 use App\Enum\FeedbackSentiment;
@@ -8,16 +10,14 @@ use App\Enum\UrgencyLevel;
 use App\Models\AIAnalysis;
 use App\Models\Departament;
 use App\Models\Feedback;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use OpenAI\Laravel\Facades\OpenAI;
 
-class AnalyzeFeedback
+final class AnalyzeFeedback
 {
     /**
      * Handle the feedback analysis action.
-     *
-     * @param Feedback $feedback
-     * @return AIAnalysis
      */
     public function handle(Feedback $feedback): AIAnalysis
     {
@@ -27,6 +27,7 @@ class AnalyzeFeedback
                 Log::info('Feedback already analyzed', [
                     'feedback_id' => $feedback->id,
                 ]);
+
                 return $feedback->aIAnalysis()->first();
             }
 
@@ -47,7 +48,7 @@ class AnalyzeFeedback
             ]);
 
             return $aiAnalysis;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Error analyzing feedback', [
                 'feedback_id' => $feedback->id,
                 'error' => $e->getMessage(),
@@ -59,9 +60,6 @@ class AnalyzeFeedback
 
     /**
      * Call OpenAI API to analyze the feedback.
-     *
-     * @param string $message
-     * @return array
      */
     private function analyzeWithAI(string $message): array
     {
@@ -73,11 +71,11 @@ class AnalyzeFeedback
             $dataset = Departament::all()->toBase();
 
             Log::info('Calling OpenAI API for feedback analysis', [
-                'message_length' => strlen($message),
-                'timeout' => config('openai.analytics_timeout', 120)
+                'message_length' => mb_strlen($message),
+                'timeout' => config('openai.analytics_timeout', 120),
             ]);
 
-            $response = $this->makeOpenAICallWithRetry(function() use ($message, $feedback) {
+            $response = $this->makeOpenAICallWithRetry(function () use ($message, $feedback) {
                 return OpenAI::chat()->create([
                     'model' => 'gpt-4o',
                     'messages' => [
@@ -95,29 +93,29 @@ class AnalyzeFeedback
                                 department (most relevant government department),
                                 summary (brief summary in 1-2 sentences).
 
-                                Feedback: {$message}"
-                        ]
+                                Feedback: {$message}",
+                        ],
                     ],
                     'response_format' => [
-                        'type' => 'json_object'
+                        'type' => 'json_object',
                     ],
                     'temperature' => 0.2,
                 ]);
             });
 
             Log::info('OpenAI API response received for feedback analysis', [
-                'response_length' => strlen($response->choices[0]->message->content ?? ''),
-                'tokens_used' => $response->usage->totalTokens ?? 0
+                'response_length' => mb_strlen($response->choices[0]->message->content ?? ''),
+                'tokens_used' => $response->usage->totalTokens ?? 0,
             ]);
 
             return json_decode($response->choices[0]->message->content, true);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('OpenAI API call failed in feedback analysis', [
                 'error' => $e->getMessage(),
                 'error_type' => get_class($e),
                 'is_timeout' => str_contains($e->getMessage(), 'execution time') || str_contains($e->getMessage(), 'timeout'),
-                'message_length' => strlen($message)
+                'message_length' => mb_strlen($message),
             ]);
 
             // Return fallback analysis if OpenAI fails
@@ -127,9 +125,6 @@ class AnalyzeFeedback
 
     /**
      * Parse the AI response to extract structured analysis.
-     *
-     * @param array $response
-     * @return array
      */
     private function parseAIResponse(array $response): array
     {
@@ -145,10 +140,6 @@ class AnalyzeFeedback
 
     /**
      * Save the AI analysis to the database.
-     *
-     * @param Feedback $feedback
-     * @param array $analysis
-     * @return AIAnalysis
      */
     private function saveFeedbackAnalysis(Feedback $feedback, array $analysis): AIAnalysis
     {
@@ -164,10 +155,6 @@ class AnalyzeFeedback
 
     /**
      * Update the feedback with insights from the analysis.
-     *
-     * @param Feedback $feedback
-     * @param array $analysis
-     * @return void
      */
     private function updateFeedbackWithInsights(Feedback $feedback, array $analysis): void
     {
@@ -181,13 +168,10 @@ class AnalyzeFeedback
 
     /**
      * Map the sentiment string to the corresponding enum.
-     *
-     * @param string $sentiment
-     * @return FeedbackSentiment
      */
     private function mapSentiment(string $sentiment): FeedbackSentiment
     {
-        return match (strtolower($sentiment)) {
+        return match (mb_strtolower($sentiment)) {
             'positive' => FeedbackSentiment::POSITIVE,
             'negative' => FeedbackSentiment::NEGATIVE,
             default => FeedbackSentiment::NEUTRAL,
@@ -196,13 +180,10 @@ class AnalyzeFeedback
 
     /**
      * Map the urgency level string to the corresponding enum.
-     *
-     * @param string $urgencyLevel
-     * @return UrgencyLevel
      */
     private function mapUrgencyLevel(string $urgencyLevel): UrgencyLevel
     {
-        return match (strtolower($urgencyLevel)) {
+        return match (mb_strtolower($urgencyLevel)) {
             'high' => UrgencyLevel::HIGH,
             'medium' => UrgencyLevel::MEDIUM,
             'critical' => UrgencyLevel::CRITICAL,
@@ -212,13 +193,10 @@ class AnalyzeFeedback
 
     /**
      * Map the feedback type string to the corresponding enum.
-     *
-     * @param string $feedbackType
-     * @return FeedbackType
      */
     private function mapFeedbackType(string $feedbackType): FeedbackType
     {
-        return match (strtolower($feedbackType)) {
+        return match (mb_strtolower($feedbackType)) {
             'complaint', 'problem' => FeedbackType::PROBLEM,
             'suggestion' => FeedbackType::SUGGESTION,
             'compliment', 'praise' => FeedbackType::PRAISE,
@@ -228,14 +206,11 @@ class AnalyzeFeedback
 
     /**
      * Get fallback analysis when OpenAI fails.
-     *
-     * @param string $message
-     * @return array
      */
     private function getFallbackAnalysis(string $message): array
     {
         // Simple keyword-based analysis as fallback
-        $messageLower = strtolower($message);
+        $messageLower = mb_strtolower($message);
 
         // Determine sentiment based on keywords
         $positiveKeywords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'like', 'thank'];
@@ -300,7 +275,7 @@ class AnalyzeFeedback
             'feedback_type' => $feedbackType,
             'tags' => ['fallback-analysis'],
             'department' => $department,
-            'summary' => substr($message, 0, 100) . (strlen($message) > 100 ? '...' : ''),
+            'summary' => mb_substr($message, 0, 100) . (mb_strlen($message) > 100 ? '...' : ''),
         ];
     }
 
@@ -318,12 +293,12 @@ class AnalyzeFeedback
                 Log::info('Making OpenAI API call for feedback analysis', [
                     'attempt' => $attempt,
                     'max_retries' => $maxRetries,
-                    'timeout' => config('openai.analytics_timeout', 120)
+                    'timeout' => config('openai.analytics_timeout', 120),
                 ]);
 
                 return $callback();
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $isTimeout = str_contains($e->getMessage(), 'execution time') ||
                             str_contains($e->getMessage(), 'timeout') ||
                             str_contains($e->getMessage(), 'cURL error 28');
@@ -332,11 +307,11 @@ class AnalyzeFeedback
                     'attempt' => $attempt,
                     'max_retries' => $maxRetries,
                     'is_timeout' => $isTimeout,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
 
                 // If this is the last attempt or not a timeout, throw the exception
-                if ($attempt >= $maxRetries || !$isTimeout) {
+                if ($attempt >= $maxRetries || ! $isTimeout) {
                     throw $e;
                 }
 
@@ -347,6 +322,6 @@ class AnalyzeFeedback
             }
         }
 
-        throw new \Exception('OpenAI API call failed after maximum retries');
+        throw new Exception('OpenAI API call failed after maximum retries');
     }
 }

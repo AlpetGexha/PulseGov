@@ -1,17 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
 use App\Actions\ProcessChatMessage;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Services\TokenOptimizationService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
-class ChatController extends Controller
+final class ChatController extends Controller
 {
     /**
      * Display the chat interface.
@@ -25,7 +28,7 @@ class ChatController extends Controller
             ->get();
 
         return Inertia::render('Chat/Index', [
-            'conversations' => $conversations
+            'conversations' => $conversations,
         ]);
     }
 
@@ -38,11 +41,11 @@ class ChatController extends Controller
             'user_id' => Auth::id(),
             'title' => 'New Conversation ' . now()->format('M j, Y g:i A'),
             'is_active' => true,
-            'last_activity_at' => now()
+            'last_activity_at' => now(),
         ]);
 
         return response()->json([
-            'conversation' => $conversation->load('messages')
+            'conversation' => $conversation->load('messages'),
         ]);
     }
 
@@ -59,7 +62,7 @@ class ChatController extends Controller
         $conversation->load('messages');
 
         return response()->json([
-            'conversation' => $conversation
+            'conversation' => $conversation,
         ]);
     }
 
@@ -69,7 +72,7 @@ class ChatController extends Controller
     public function sendMessage(Request $request, Conversation $conversation, TokenOptimizationService $tokenService)
     {
         $request->validate([
-            'message' => 'required|string|max:2000'
+            'message' => 'required|string|max:2000',
         ]);
 
         // Ensure user owns this conversation
@@ -89,18 +92,18 @@ class ChatController extends Controller
                 'success' => true,
                 'user_message' => $result['user_message'],
                 'assistant_message' => $result['assistant_message'],
-                'token_usage' => $result['token_usage']
+                'token_usage' => $result['token_usage'],
             ]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('Chat message error', [
                 'error' => $e->getMessage(),
                 'conversation_id' => $conversation->id,
-                'user_id' => Auth::id()
+                'user_id' => Auth::id(),
             ]);
 
             return response()->json([
-                'error' => 'Failed to process message. Please try again.'
+                'error' => 'Failed to process message. Please try again.',
             ], 500);
         }
     }
@@ -133,7 +136,7 @@ class ChatController extends Controller
             ->get();
 
         return response()->json([
-            'conversations' => $conversations
+            'conversations' => $conversations,
         ]);
     }
 }

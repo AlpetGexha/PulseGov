@@ -1,7 +1,8 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Enum\FeedbackStatus;
-use App\Enum\FeedbackType;
 use App\Models\Feedback;
 use App\Models\User;
 
@@ -30,9 +31,9 @@ test('authenticated user can submit feedback', function () {
                 'tracking_code',
                 'status',
                 'created_at',
-                'updated_at'
+                'updated_at',
             ],
-            'message'
+            'message',
         ]);
 
     // Verify data was stored correctly

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Requests\API;
 
 use App\Enum\FeedbackSentiment;
@@ -8,7 +10,7 @@ use App\Enum\FeedbackType;
 use App\Enum\UrgencyLevel;
 use App\Http\Requests\FormRequest;
 
-class FeedbackRequest extends FormRequest
+final class FeedbackRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Jobs;
 
 use App\Models\Feedback;
 use App\Services\OpenAIService;
-use Carbon\Carbon;
+use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -13,13 +15,14 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
-class GenerateAIAnalyticsJob implements ShouldQueue
+final class GenerateAIAnalyticsJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected string $progressKey;
     public $timeout = 3600; // 1 hour timeout
-    
+
+    protected string $progressKey;
+
     public function __construct(
         protected int $userId,
         ?string $progressKey = null
@@ -60,7 +63,7 @@ class GenerateAIAnalyticsJob implements ShouldQueue
             $recommendations = $this->generateRecommendations($openai, [
                 'sentiment' => $sentimentAnalysis,
                 'locations' => $locationHotspots,
-                'departments' => $departmentInsights
+                'departments' => $departmentInsights,
             ]);
             $currentStep++;
 
@@ -72,28 +75,33 @@ class GenerateAIAnalyticsJob implements ShouldQueue
                 'department_insights' => $departmentInsights,
                 'ai_recommendations' => $recommendations,
                 'generated_at' => now()->toISOString(),
-                'ai_generated' => true
+                'ai_generated' => true,
             ]);
 
             // Mark as complete
             $this->updateProgress(100, 'Analysis complete!');
-            
+
             // Clear progress after a delay
             Cache::put($this->progressKey, [
                 'progress' => 100,
                 'message' => 'Analysis complete!',
-                'status' => 'completed'
+                'status' => 'completed',
             ], now()->addMinutes(5));
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('AI Analytics Generation failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $this->updateProgress(0, 'Analysis failed: ' . $e->getMessage(), 'failed');
             throw $e;
         }
+    }
+
+    public function getProgressKey(): string
+    {
+        return $this->progressKey;
     }
 
     protected function updateProgress(int $progress, string $message, string $status = 'processing'): void
@@ -102,13 +110,13 @@ class GenerateAIAnalyticsJob implements ShouldQueue
             'progress' => $progress,
             'message' => $message,
             'status' => $status,
-            'updated_at' => now()->toISOString()
+            'updated_at' => now()->toISOString(),
         ], now()->addHours(1));
 
         Log::info('AI Analytics progress update', [
             'progress' => $progress,
             'message' => $message,
-            'key' => $this->progressKey
+            'key' => $this->progressKey,
         ]);
     }
 
@@ -116,7 +124,7 @@ class GenerateAIAnalyticsJob implements ShouldQueue
     {
         // Simulate processing time
         sleep(2);
-        
+
         return [
             'positive' => $feedbacks->where('sentiment', 'POSITIVE')->count(),
             'negative' => $feedbacks->where('sentiment', 'NEGATIVE')->count(),
@@ -128,7 +136,7 @@ class GenerateAIAnalyticsJob implements ShouldQueue
     {
         // Simulate processing time
         sleep(2);
-        
+
         return $feedbacks
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
@@ -139,9 +147,9 @@ class GenerateAIAnalyticsJob implements ShouldQueue
                     'count' => $group->count(),
                     'coordinates' => [
                         'lat' => $group->first()->latitude,
-                        'lng' => $group->first()->longitude
+                        'lng' => $group->first()->longitude,
                     ],
-                    'urgency_level' => $group->avg('urgency_level')
+                    'urgency_level' => $group->avg('urgency_level'),
                 ];
             })
             ->values()
@@ -152,7 +160,7 @@ class GenerateAIAnalyticsJob implements ShouldQueue
     {
         // Simulate processing time
         sleep(2);
-        
+
         return $feedbacks
             ->groupBy('department_assigned')
             ->map(function ($group) {
@@ -161,7 +169,7 @@ class GenerateAIAnalyticsJob implements ShouldQueue
                     'total_feedback' => $group->count(),
                     'urgent_cases' => $group->where('urgency_level', 'HIGH')->count(),
                     'avg_sentiment' => $group->avg('sentiment'),
-                    'response_time' => rand(24, 72) // Simulated average response time
+                    'response_time' => rand(24, 72), // Simulated average response time
                 ];
             })
             ->values()
@@ -172,33 +180,28 @@ class GenerateAIAnalyticsJob implements ShouldQueue
     {
         // Simulate AI processing time
         sleep(3);
-        
+
         return [
             'immediate_actions' => [
                 'Address high-urgency cases in identified hotspots',
                 'Improve response time for departments with delays',
-                'Focus on areas with negative sentiment trends'
+                'Focus on areas with negative sentiment trends',
             ],
             'long_term_strategies' => [
                 'Develop preventive maintenance schedules',
                 'Implement department-specific improvement plans',
-                'Enhance citizen communication channels'
+                'Enhance citizen communication channels',
             ],
             'resource_allocation' => [
                 'Redistribute resources based on workload analysis',
                 'Increase staffing for high-demand departments',
-                'Invest in automation for common issues'
-            ]
+                'Invest in automation for common issues',
+            ],
         ];
     }
 
     protected function cacheResults(array $results): void
     {
         Cache::put('ai_analytics_data', $results, now()->addHours(24));
-    }
-
-    public function getProgressKey(): string
-    {
-        return $this->progressKey;
     }
 }

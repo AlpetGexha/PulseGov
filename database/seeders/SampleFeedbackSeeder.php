@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
-use App\Models\Feedback;
-use App\Models\User;
 use App\Enum\FeedbackSentiment;
-use App\Enum\UrgencyLevel;
 use App\Enum\FeedbackStatus;
+use App\Enum\UrgencyLevel;
+use App\Models\Feedback;
 use Illuminate\Database\Seeder;
 
-class SampleFeedbackSeeder extends Seeder
+final class SampleFeedbackSeeder extends Seeder
 {
     public function run(): void
     {

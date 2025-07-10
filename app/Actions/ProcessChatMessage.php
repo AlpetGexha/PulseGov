@@ -1,19 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Actions;
 
-use App\Models\Conversation;
-use App\Models\Message;
-use App\Models\Feedback;
 use App\Enum\FeedbackSentiment;
 use App\Enum\UrgencyLevel;
+use App\Models\Conversation;
+use App\Models\Feedback;
+use App\Models\Message;
 use App\Services\TokenOptimizationService;
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use OpenAI\Laravel\Facades\OpenAI;
-use OpenAI\Client as OpenAIClient;
 
-class ProcessChatMessage
+final class ProcessChatMessage
 {
     private TokenOptimizationService $tokenService;
 
@@ -22,11 +23,73 @@ class ProcessChatMessage
         $this->tokenService = $tokenService;
     }
 
+    public function handle(Conversation $conversation, string $userMessage): array
+    {
+        // Check if conversation needs compression
+        if ($this->tokenService->shouldCompressHistory($conversation)) {
+            $this->tokenService->compressOldMessages($conversation);
+        }
+
+        // Get feedback context based on user query
+        $feedbackContext = $this->getFeedbackContext($userMessage);
+
+        // Build optimized conversation history
+        $conversationHistory = $this->buildOptimizedConversationHistory($conversation, $feedbackContext);
+
+        // Add the current user message to the conversation history
+        $conversationHistory[] = [
+            'role' => 'user',
+            'content' => $userMessage,
+        ];
+
+        // Generate AI response
+        $aiResponse = $this->generateAIResponse($conversationHistory, $userMessage, $feedbackContext);
+
+        // Create user message record
+        $userTokens = $this->tokenService->estimateTokens($userMessage);
+        $userMessageRecord = Message::create([
+            'conversation_id' => $conversation->id,
+            'role' => 'user',
+            'content' => $userMessage,
+            'token_count' => $userTokens,
+        ]);
+
+        // Create assistant message
+        $assistantMessage = Message::create([
+            'conversation_id' => $conversation->id,
+            'role' => 'assistant',
+            'content' => $aiResponse['content'],
+            'token_count' => $aiResponse['token_usage'],
+            'metadata' => [
+                'processing_time' => $aiResponse['processing_time'],
+                'model' => $aiResponse['model'],
+                'feedback_samples' => count($feedbackContext['samples']),
+                'optimization_applied' => $aiResponse['optimization_applied'] ?? false,
+            ],
+        ]);
+
+        // Update conversation token usage
+        $conversation->addTokenUsage($aiResponse['token_usage'] + $userTokens);
+
+        // Update conversation title if it's the first exchange
+        if ($conversation->messages()->count() === 2) {
+            $conversation->update([
+                'title' => $this->generateConversationTitle($userMessage),
+            ]);
+        }
+
+        return [
+            'user_message' => $userMessageRecord,
+            'assistant_message' => $assistantMessage,
+            'token_usage' => $aiResponse['token_usage'] + $userTokens,
+        ];
+    }
+
     private function callOpenAIWithCurl(array $conversationHistory): array
     {
         $apiKey = config('openai.api_key');
         $model = config('chat.openai.model', 'gpt-3.5-turbo');
-        $maxTokens = (int)config('chat.openai.max_tokens', 4000);
+        $maxTokens = (int) config('chat.openai.max_tokens', 4000);
         $temperature = config('chat.openai.temperature', 0.7);
 
         $data = [
@@ -54,13 +117,13 @@ class ProcessChatMessage
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if (curl_errno($ch)) {
-            throw new \Exception('cURL error: ' . curl_error($ch));
+            throw new Exception('cURL error: ' . curl_error($ch));
         }
 
         curl_close($ch);
 
         if ($httpCode !== 200) {
-            throw new \Exception('OpenAI API error. HTTP Code: ' . $httpCode . '. Response: ' . $response);
+            throw new Exception('OpenAI API error. HTTP Code: ' . $httpCode . '. Response: ' . $response);
         }
 
         $responseData = json_decode($response, true);
@@ -68,68 +131,6 @@ class ProcessChatMessage
         return [
             'content' => $responseData['choices'][0]['message']['content'],
             'token_usage' => $responseData['usage']['total_tokens'],
-        ];
-    }
-
-    public function handle(Conversation $conversation, string $userMessage): array
-    {
-        // Check if conversation needs compression
-        if ($this->tokenService->shouldCompressHistory($conversation)) {
-            $this->tokenService->compressOldMessages($conversation);
-        }
-
-        // Get feedback context based on user query
-        $feedbackContext = $this->getFeedbackContext($userMessage);
-
-        // Build optimized conversation history
-        $conversationHistory = $this->buildOptimizedConversationHistory($conversation, $feedbackContext);
-        
-        // Add the current user message to the conversation history
-        $conversationHistory[] = [
-            'role' => 'user',
-            'content' => $userMessage
-        ];
-
-        // Generate AI response
-        $aiResponse = $this->generateAIResponse($conversationHistory, $userMessage, $feedbackContext);
-
-        // Create user message record
-        $userTokens = $this->tokenService->estimateTokens($userMessage);
-        $userMessageRecord = Message::create([
-            'conversation_id' => $conversation->id,
-            'role' => 'user',
-            'content' => $userMessage,
-            'token_count' => $userTokens
-        ]);
-
-        // Create assistant message
-        $assistantMessage = Message::create([
-            'conversation_id' => $conversation->id,
-            'role' => 'assistant',
-            'content' => $aiResponse['content'],
-            'token_count' => $aiResponse['token_usage'],
-            'metadata' => [
-                'processing_time' => $aiResponse['processing_time'],
-                'model' => $aiResponse['model'],
-                'feedback_samples' => count($feedbackContext['samples']),
-                'optimization_applied' => $aiResponse['optimization_applied'] ?? false
-            ]
-        ]);
-
-        // Update conversation token usage
-        $conversation->addTokenUsage($aiResponse['token_usage'] + $userTokens);
-
-        // Update conversation title if it's the first exchange
-        if ($conversation->messages()->count() === 2) {
-            $conversation->update([
-                'title' => $this->generateConversationTitle($userMessage)
-            ]);
-        }
-
-        return [
-            'user_message' => $userMessageRecord,
-            'assistant_message' => $assistantMessage,
-            'token_usage' => $aiResponse['token_usage'] + $userTokens
         ];
     }
 
@@ -144,7 +145,7 @@ class ProcessChatMessage
             // Get relevant feedback based on keywords, prioritizing critical issues
             $feedbackQuery = Feedback::with(['user', 'aIAnalysis'])
                 ->whereNotNull('sentiment')
-                ->orderByRaw("CASE 
+                ->orderByRaw("CASE
                     WHEN urgency_level = 'critical' THEN 1
                     WHEN urgency_level = 'high' THEN 2
                     WHEN urgency_level = 'medium' THEN 3
@@ -154,13 +155,13 @@ class ProcessChatMessage
                 ->limit(config('chat.feedback.sample_size', 50));
 
             // Apply keyword filtering if keywords exist
-            if (!empty($keywords)) {
+            if (! empty($keywords)) {
                 $feedbackQuery->where(function ($query) use ($keywords) {
                     foreach ($keywords as $keyword) {
                         $query->orWhere('title', 'like', "%{$keyword}%")
-                              ->orWhere('body', 'like', "%{$keyword}%")
-                              ->orWhere('department_assigned', 'like', "%{$keyword}%")
-                              ->orWhere('location', 'like', "%{$keyword}%");
+                            ->orWhere('body', 'like', "%{$keyword}%")
+                            ->orWhere('department_assigned', 'like', "%{$keyword}%")
+                            ->orWhere('location', 'like', "%{$keyword}%");
                     }
                 });
             }
@@ -187,9 +188,9 @@ class ProcessChatMessage
                 'statistics' => [
                     'total_feedback' => $totalFeedback,
                     'sentiment_distribution' => $sentimentDistribution,
-                    'urgency_distribution' => $urgencyDistribution
+                    'urgency_distribution' => $urgencyDistribution,
                 ],
-                'keywords' => $keywords
+                'keywords' => $keywords,
             ];
         });
     }
@@ -198,9 +199,9 @@ class ProcessChatMessage
     {
         $commonWords = ['the', 'is', 'at', 'which', 'on', 'and', 'a', 'to', 'are', 'as', 'was', 'were', 'been', 'be', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should', 'could', 'can', 'may', 'might', 'must', 'shall', 'about', 'what', 'where', 'when', 'why', 'how', 'who', 'with', 'from', 'for', 'of', 'in', 'by', 'me', 'show', 'tell', 'give', 'get', 'latest', 'recent', 'new', 'old'];
 
-        $words = str_word_count(strtolower($text), 1);
-        $keywords = array_filter($words, function($word) use ($commonWords) {
-            return strlen($word) > 3 && !in_array($word, $commonWords);
+        $words = str_word_count(mb_strtolower($text), 1);
+        $keywords = array_filter($words, function ($word) use ($commonWords) {
+            return mb_strlen($word) > 3 && ! in_array($word, $commonWords);
         });
 
         return array_values(array_unique($keywords));
@@ -221,7 +222,7 @@ class ProcessChatMessage
         if ($tokenCount + $systemTokens < $maxTokens) {
             $history[] = [
                 'role' => 'system',
-                'content' => $systemMessage
+                'content' => $systemMessage,
             ];
             $tokenCount += $systemTokens;
         }
@@ -234,7 +235,7 @@ class ProcessChatMessage
 
             $history[] = [
                 'role' => $message['role'],
-                'content' => $message['content']
+                'content' => $message['content'],
             ];
             $tokenCount += $message['token_count'];
         }
@@ -273,20 +274,20 @@ Answer all questions using the specific data provided above. Focus on actionable
     private function buildFeedbackSummary(object $samples): string
     {
         if ($samples->isEmpty()) {
-            return "No specific feedback samples available for this query.";
+            return 'No specific feedback samples available for this query.';
         }
 
         $summary = [];
         $criticalIssues = [];
         $highPriorityIssues = [];
         $regularIssues = [];
-        
+
         foreach ($samples as $feedback) {
             $urgencyLevel = $feedback->urgency_level?->value ?? 'unknown';
             $sentiment = $feedback->sentiment?->value ?? 'neutral';
             $feedbackUrl = url("/feedback/{$feedback->id}");
             $feedbackLine = "- \"{$feedback->title}\" (Location: {$feedback->location}, Urgency: {$urgencyLevel}, Sentiment: {$sentiment}) - View details: {$feedbackUrl}";
-            
+
             if ($urgencyLevel === 'critical') {
                 $criticalIssues[] = $feedbackLine;
             } elseif ($urgencyLevel === 'high') {
@@ -297,17 +298,17 @@ Answer all questions using the specific data provided above. Focus on actionable
         }
 
         // Build summary starting with most critical
-        if (!empty($criticalIssues)) {
-            $summary[] = "CRITICAL ISSUES (requiring immediate attention):";
+        if (! empty($criticalIssues)) {
+            $summary[] = 'CRITICAL ISSUES (requiring immediate attention):';
             $summary = array_merge($summary, array_slice($criticalIssues, 0, 3));
         }
-        
-        if (!empty($highPriorityIssues)) {
+
+        if (! empty($highPriorityIssues)) {
             $summary[] = "\nHIGH PRIORITY ISSUES:";
             $summary = array_merge($summary, array_slice($highPriorityIssues, 0, 3));
         }
-        
-        if (!empty($regularIssues) && count($summary) < 8) {
+
+        if (! empty($regularIssues) && count($summary) < 8) {
             $summary[] = "\nOTHER FEEDBACK:";
             $summary = array_merge($summary, array_slice($regularIssues, 0, 2));
         }
@@ -322,9 +323,9 @@ Answer all questions using the specific data provided above. Focus on actionable
 
         try {
             Log::info('Generating AI response for chat', [
-                'user_message_length' => strlen($userMessage),
+                'user_message_length' => mb_strlen($userMessage),
                 'context_samples' => count($feedbackContext['samples']),
-                'conversation_history_length' => count($conversationHistory)
+                'conversation_history_length' => count($conversationHistory),
             ]);
 
             $openAIResponse = $this->callOpenAIWithCurl($conversationHistory);
@@ -336,8 +337,8 @@ Answer all questions using the specific data provided above. Focus on actionable
             Log::info('AI response generated successfully', [
                 'processing_time' => $processingTime,
                 'token_usage' => $tokenUsage,
-                'response_length' => strlen($content),
-                'optimization_applied' => $optimizationApplied
+                'response_length' => mb_strlen($content),
+                'optimization_applied' => $optimizationApplied,
             ]);
 
             return [
@@ -345,14 +346,14 @@ Answer all questions using the specific data provided above. Focus on actionable
                 'token_usage' => $tokenUsage,
                 'processing_time' => $processingTime,
                 'model' => config('chat.openai.model', 'gpt-4o'),
-                'optimization_applied' => $optimizationApplied
+                'optimization_applied' => $optimizationApplied,
             ];
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error('AI response generation failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'processing_time' => microtime(true) - $startTime
+                'processing_time' => microtime(true) - $startTime,
             ]);
 
             return [
@@ -360,7 +361,7 @@ Answer all questions using the specific data provided above. Focus on actionable
                 'token_usage' => 0,
                 'processing_time' => microtime(true) - $startTime,
                 'model' => 'fallback',
-                'optimization_applied' => false
+                'optimization_applied' => false,
             ];
         }
     }
@@ -370,8 +371,8 @@ Answer all questions using the specific data provided above. Focus on actionable
         $words = explode(' ', $userMessage);
         $title = implode(' ', array_slice($words, 0, 6));
 
-        if (strlen($title) > 50) {
-            $title = substr($title, 0, 47) . '...';
+        if (mb_strlen($title) > 50) {
+            $title = mb_substr($title, 0, 47) . '...';
         }
 
         return $title;
