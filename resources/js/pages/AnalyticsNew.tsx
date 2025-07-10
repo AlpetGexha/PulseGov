@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import axios from 'axios';
 
 import {
     TrendingUp,
@@ -25,6 +26,7 @@ import {
     Lightbulb,
     RefreshCw
 } from 'lucide-react';
+import ProgressTracker from '@/Components/ProgressTracker';
 
 interface FeedbackTopic {
     id: string;
@@ -109,6 +111,7 @@ export default function Analytics({ analytics }: AnalyticsProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isGeneratingAI, setIsGeneratingAI] = useState(false);
     const [activeTab, setActiveTab] = useState('priorities');
+    const [progressKey, setProgressKey] = useState<string | null>(null);
 
     const handleRefresh = async () => {
         setIsLoading(true);
@@ -126,6 +129,26 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                 router.reload({ only: ['analytics'] });
             }
         });
+    };
+
+    const startAnalysis = async () => {
+        try {
+            setIsGeneratingAI(true);
+            const response = await axios.post('/analytics/generate-ai');
+            
+            // Extract progress key from the response or URL
+            const key = response.data.progressKey || response.data.progress_key;
+            setProgressKey(key);
+        } catch (error) {
+            console.error('Failed to start analysis:', error);
+        }
+    };
+
+    const handleAnalysisComplete = () => {
+        setIsGeneratingAI(false);
+        setProgressKey(null);
+        // Optionally reload the page or fetch new data
+        window.location.reload();
     };
 
     const getPriorityColor = (score: number) => {
@@ -243,6 +266,41 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                         </AlertDescription>
                     </Alert>
                 )}
+
+                {/* Analytics Generation Controls */}
+                <div className="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg p-6 mb-6">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                                AI Analytics Generation
+                            </h2>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Generate AI-powered insights from your feedback data
+                            </p>
+                        </div>
+                        <button
+                            onClick={startAnalysis}
+                            disabled={isGeneratingAI}
+                            className={`px-4 py-2 rounded-lg ${
+                                isGeneratingAI
+                                    ? 'bg-gray-300 cursor-not-allowed'
+                                    : 'bg-blue-600 hover:bg-blue-700'
+                            } text-white font-medium transition-colors`}
+                        >
+                            {isGeneratingAI ? 'Generating...' : 'Generate Analysis'}
+                        </button>
+                    </div>
+
+                    {/* Progress Tracker */}
+                    {progressKey && (
+                        <div className="mt-6">
+                            <ProgressTracker
+                                progressKey={progressKey}
+                                onComplete={handleAnalysisComplete}
+                            />
+                        </div>
+                    )}
+                </div>
 
                 {/* Key Metrics */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

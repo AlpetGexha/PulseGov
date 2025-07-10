@@ -156,8 +156,11 @@ class AnalyticsController extends Controller
                 'progress' => 0
             ], 3600);
 
-            // Dispatch the background job
-            dispatch((new GenerateAIAnalyticsJob(Auth::id()))->onQueue('analytics'));
+            // Generate a unique progress key
+            $progressKey = 'analytics_progress_' . uniqid();
+            
+            // Dispatch the background job with progress tracking
+            dispatch((new GenerateAIAnalyticsJob(Auth::id(), $progressKey))->onQueue('analytics'));
 
             Log::info('AI analysis job dispatched', [
                 'user_id' => Auth::id(),

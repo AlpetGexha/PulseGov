@@ -29,6 +29,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('chat/conversations/{conversation}/messages', [App\Http\Controllers\ChatController::class, 'sendMessage'])->name('chat.conversations.messages.store');
     Route::delete('chat/conversations/{conversation}', [App\Http\Controllers\ChatController::class, 'deleteConversation'])->name('chat.conversations.destroy');
     Route::get('chat/history', [App\Http\Controllers\ChatController::class, 'getConversationHistory'])->name('chat.history');
+
+    // Job Progress Route
+    Route::get('job-progress/{key}', [App\Http\Controllers\JobProgressController::class, 'getProgress'])->name('job.progress');
 });
 
 // Feedback Forum Routes
