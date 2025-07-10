@@ -216,6 +216,12 @@ php artisan key:generate
 composer run dev
 ```
 
+Start the queue worker in another terminal (ssl is required for OpenAI):
+
+```bash
+php artisan queue:work --queue=analytics 
+```
+
 ## ⚙️ Tech Stack
 
 - **Laravel 12** (Backend)
