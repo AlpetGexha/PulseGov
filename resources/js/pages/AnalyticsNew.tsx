@@ -262,6 +262,7 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                     <Alert className="bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
                         <Brain className="h-5 w-5 text-purple-500 mr-2" />
                         <AlertDescription className="text-purple-800 dark:text-purple-200 flex-1">
+                            THE PROCESS NEED 2 min to process after pressing the button so plz wiat and refresh the page after 2 min
                             <span className="font-medium">Enhanced AI Analysis Available!</span> Generate AI-powered insights by clicking the "Generate AI Analysis" button above.
                         </AlertDescription>
                     </Alert>
