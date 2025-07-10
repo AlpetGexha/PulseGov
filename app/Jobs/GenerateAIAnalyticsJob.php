@@ -352,9 +352,9 @@ Focus on specific, actionable recommendations that address the highest priority 
             ->toArray();
 
         $locationHotspots = Feedback::select('location', DB::raw('count(*) as count'), DB::raw('AVG(CASE
-            WHEN urgency_level = "critical" THEN 4
-            WHEN urgency_level = "high" THEN 3
-            WHEN urgency_level = "medium" THEN 2
+            WHEN urgency_level = \'' . UrgencyLevel::CRITICAL->value . '\' THEN 4
+            WHEN urgency_level = \'' . UrgencyLevel::HIGH->value . '\' THEN 3
+            WHEN urgency_level = \'' . UrgencyLevel::MEDIUM->value . '\' THEN 2
             ELSE 1 END) as avg_urgency'))
             ->whereNotNull('location')
             ->groupBy('location')
