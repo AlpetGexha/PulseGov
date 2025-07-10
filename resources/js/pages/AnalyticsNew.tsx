@@ -93,6 +93,10 @@ interface AnalyticsData {
         engagement_rate: number;
     };
     generated_at: string;
+    is_cached?: boolean;
+    ai_generated?: boolean;
+    needs_ai_generation?: boolean;
+    cache_expires_at?: string;
 }
 
 interface AnalyticsProps {
@@ -173,12 +177,23 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                                     Cached
                                 </Badge>
                             )}
+                            {analytics.ai_generated && (
+                                <Badge className="ml-2 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100">
+                                    <Brain className="h-3 w-3 mr-1" />
+                                    AI Enhanced
+                                </Badge>
+                            )}
                         </div>
                         <Button
                             onClick={handleGenerateAI}
                             disabled={isGeneratingAI || isLoading}
-                            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                            className={`bg-gradient-to-r ${
+                                analytics.needs_ai_generation 
+                                  ? 'from-purple-600 to-blue-700 hover:from-purple-700 hover:to-blue-800 ring-2 ring-purple-400' 
+                                  : 'from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700'
+                            } text-white ${analytics.needs_ai_generation ? 'animate-pulse' : ''}`}
                             title="Generate fresh AI analysis using OpenAI GPT-4"
+                            size={analytics.needs_ai_generation ? "lg" : "default"}
                         >
                             {isGeneratingAI ? (
                                 <Brain className="h-4 w-4 animate-pulse mr-2" />
@@ -215,6 +230,16 @@ export default function Analytics({ analytics }: AnalyticsProps) {
                     <Alert className="bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800">
                         <AlertDescription className="text-red-800 dark:text-red-200">
                             {flash.error}
+                        </AlertDescription>
+                    </Alert>
+                )}
+                
+                {/* AI Analysis Notice */}
+                {analytics.needs_ai_generation && (
+                    <Alert className="bg-purple-50 border-purple-200 dark:bg-purple-900/20 dark:border-purple-800">
+                        <Brain className="h-5 w-5 text-purple-500 mr-2" />
+                        <AlertDescription className="text-purple-800 dark:text-purple-200 flex-1">
+                            <span className="font-medium">Enhanced AI Analysis Available!</span> Generate AI-powered insights by clicking the "Generate AI Analysis" button above.
                         </AlertDescription>
                     </Alert>
                 )}
