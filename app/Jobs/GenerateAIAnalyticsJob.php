@@ -6,6 +6,7 @@ namespace App\Jobs;
 
 use App\Models\Feedback;
 use App\Services\OpenAIService;
+use App\Enum\UrgencyLevel;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -22,6 +23,13 @@ final class GenerateAIAnalyticsJob implements ShouldQueue
     public $timeout = 3600; // 1 hour timeout
 
     protected string $progressKey;
+
+    private array $urgencyScores = [
+        UrgencyLevel::LOW->value => 1,
+        UrgencyLevel::MEDIUM->value => 2,
+        UrgencyLevel::HIGH->value => 3,
+        UrgencyLevel::CRITICAL->value => 4
+    ];
 
     public function __construct(
         protected int $userId,
@@ -142,6 +150,11 @@ final class GenerateAIAnalyticsJob implements ShouldQueue
             ->whereNotNull('longitude')
             ->groupBy('location')
             ->map(function ($group) {
+                // Calculate average urgency score
+                $avgUrgencyScore = $group->average(function ($feedback) {
+                    return $this->urgencyScores[$feedback->urgency_level?->value] ?? 1;
+                });
+
                 return [
                     'location' => $group->first()->location,
                     'count' => $group->count(),
@@ -149,7 +162,8 @@ final class GenerateAIAnalyticsJob implements ShouldQueue
                         'lat' => $group->first()->latitude,
                         'lng' => $group->first()->longitude,
                     ],
-                    'urgency_level' => $group->avg('urgency_level'),
+                    'urgency_level' => $avgUrgencyScore,
+                    'high_urgency_count' => $group->whereIn('urgency_level', [UrgencyLevel::HIGH->value, UrgencyLevel::CRITICAL->value])->count(),
                 ];
             })
             ->values()
@@ -164,11 +178,16 @@ final class GenerateAIAnalyticsJob implements ShouldQueue
         return $feedbacks
             ->groupBy('department_assigned')
             ->map(function ($group) {
+                // Calculate average urgency score for the department
+                $avgUrgencyScore = $group->average(function ($feedback) {
+                    return $this->urgencyScores[$feedback->urgency_level?->value] ?? 1;
+                });
+
                 return [
                     'department' => $group->first()->department_assigned,
                     'total_feedback' => $group->count(),
-                    'urgent_cases' => $group->where('urgency_level', 'HIGH')->count(),
-                    'avg_sentiment' => $group->avg('sentiment'),
+                    'urgent_cases' => $group->whereIn('urgency_level', [UrgencyLevel::HIGH->value, UrgencyLevel::CRITICAL->value])->count(),
+                    'avg_urgency' => round($avgUrgencyScore, 2),
                     'response_time' => rand(24, 72), // Simulated average response time
                 ];
             })
