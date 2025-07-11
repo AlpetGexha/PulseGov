@@ -31,7 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('analytics/clear-cache', [AnalyticsController::class, 'clearCache'])->name('analytics.clear-cache');
 
     // Map Route
-    Route::get('map', [MapController::class, 'index'])->name('map.index');
+    Route::get('map', MapController::class)->name('map.index');
 
     // Chat Routes
     Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
