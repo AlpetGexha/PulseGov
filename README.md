@@ -244,6 +244,7 @@ php artisan queue:work --queue=analytics
 ### Main Features
 
 ![Dashboard](screenshots/dashboard.png)
+![Analytics](screenshots/analytics.png)
 ![Forum Interface](screenshots/forumi.png)
 ![Forum Single](screenshots/Forumi_single.png)
 ![Admin Chat](screenshots/admin-chat.png)
