@@ -30,7 +30,7 @@ final class FeedbackResource extends JsonResource
             'service' => $this->service,
             'feedback_type' => [
                 'value' => $this->feedback_type,
-                'label' => $this->feedback_type ? $this->feedback_type->label() : null,
+                'label' => $this->feedback_type ?? null
             ],
             'created_at' => $this->created_at->format('Y-m-d H:i:s'),
             'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),

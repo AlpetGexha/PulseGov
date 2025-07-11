@@ -3,9 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\AnalyticsController;
-use App\Http\Controllers\API\FeedbackCommentController;
-use App\Http\Controllers\API\FeedbackController;
-use App\Http\Controllers\API\FeedbackVoteController;
+use App\Http\Controllers\FeedbackCommentController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\FeedbackVoteController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\JobProgressController;
 use App\Http\Controllers\MapController;
@@ -31,12 +31,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('analytics/clear-cache', [AnalyticsController::class, 'clearCache'])->name('analytics.clear-cache');
 
     // Map Route
-    Route::get('map', MapController::class)->name('map.index');
+    Route::get('map', [MapController::class, 'index'])->name('map.index');
 
     // Chat Routes
     Route::get('chat', [ChatController::class, 'index'])->name('chat.index');
-    Route::post('chat/conversations', [ChatController::class, 'createConversation'])->name('chat.conversations.create');
+    
     Route::get('chat/conversations/{conversation}', [ChatController::class, 'getConversation'])->name('chat.conversations.show');
+    Route::post('chat/conversations', [ChatController::class, 'createConversation'])->name('chat.conversations.create');
+
     Route::post('chat/conversations/{conversation}/messages', [ChatController::class, 'sendMessage'])->name('chat.conversations.messages.store');
     Route::delete('chat/conversations/{conversation}', [ChatController::class, 'deleteConversation'])->name('chat.conversations.destroy');
     Route::get('chat/history', [ChatController::class, 'getConversationHistory'])->name('chat.history');
