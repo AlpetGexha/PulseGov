@@ -70,7 +70,7 @@ export default function VotingCard({ feedback, auth, className }: VotingCardProp
 
             await router.post('/feedback/vote', {
                 feedback_id: feedback.id,
-                vote_type: voteTypeForServer,
+                vote: voteTypeForServer, // Changed from vote_type to vote
             }, {
                 preserveScroll: true,
                 onSuccess: (page) => {
