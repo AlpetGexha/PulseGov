@@ -245,8 +245,9 @@ php artisan queue:work --queue=analytics
 
 ![Dashboard](screenshots/dashboard.png)
 ![Forum Interface](screenshots/forumi.png)
+![Forum Single](screenshots/Forumi_single.png)
 ![Admin Chat](screenshots/admin-chat.png)
-![Interactive Maps](screenshots/Maps.jpg)
+![Interactive Maps](screenshots/Maps.png)
 
 
 
