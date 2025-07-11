@@ -18,7 +18,7 @@ final class FeedbackVoteController extends Controller
      * Store or update a vote for feedback.
      */
     public function vote(FeedbackVoteRequest $request): JsonResponse
-    {
+    {;
         $feedback = Feedback::findOrFail($request->feedback_id);
         $userId = Auth::id();
 
