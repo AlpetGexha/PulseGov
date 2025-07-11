@@ -9,7 +9,7 @@ use Inertia\Inertia;
 
 final class MapController extends Controller
 {
-    public function index()
+    public function __invoke()
     {
         $feedbacks = Feedback::with(['user', 'aIAnalysis'])
             ->whereNotNull('latitude')
