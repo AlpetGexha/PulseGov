@@ -39,7 +39,7 @@ class AnalyticsController extends Controller
     private function getCachedAnalyticsData(): array
     {
         $cacheKey = 'ai_analytics_data';
-        $cacheDuration = 3600; // 1 hour
+        $cacheDuration = 86400; // 1 day (24 hours)
 
         // Try to get cached data first
         $cachedData = Cache::get($cacheKey);

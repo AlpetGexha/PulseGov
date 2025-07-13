@@ -93,7 +93,7 @@ class GenerateAIAnalyticsJob implements ShouldQueue
 
             // Cache results
             $cacheKey = 'ai_analytics_data';
-            $cacheDuration = 3600; // 1 hour
+            $cacheDuration = 86400; // 1 day (24 hours)
 
             Cache::put($cacheKey, $analyticsData, $cacheDuration);
 

@@ -268,6 +268,80 @@ export default function ChatIndex({ conversations: initialConversations = [] }) 
                                     <div className="flex justify-center items-center h-32">
                                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                                     </div>
+                                ) : messages.length === 0 ? (
+                                    <div className="flex items-center justify-center h-full">
+                                        <div className="text-center max-w-2xl">
+                                            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                <Bot className="h-8 w-8 text-primary" />
+                                            </div>
+                                            <h3 className="text-xl font-semibold mb-2">
+                                                How can I help you today?
+                                            </h3>
+                                            <p className="text-muted-foreground mb-6">
+                                                Choose a question below or type your own message
+                                            </p>
+                                            
+                                            {/* Tab Suggestions */}
+                                            <div className="grid grid-cols-1 gap-3 mb-6">
+                                                <button
+                                                    onClick={() => setNewMessage("What are the top 5 most urgent feedback issues reported in the last month?")}
+                                                    className="p-4 text-left border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-8 h-8 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-red-600 dark:text-red-400 text-sm font-medium">🚨</span>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-primary">
+                                                                Urgent Issues Analysis
+                                                            </h4>
+                                                            <p className="text-sm text-muted-foreground mt-1">
+                                                                Get insights on the most critical feedback that needs immediate attention
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                                
+                                                <button
+                                                    onClick={() => setNewMessage("Show me feedback trends and sentiment analysis for different departments")}
+                                                    className="p-4 text-left border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-blue-600 dark:text-blue-400 text-sm font-medium">📊</span>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-primary">
+                                                                Department Performance
+                                                            </h4>
+                                                            <p className="text-sm text-muted-foreground mt-1">
+                                                                Analyze feedback trends and citizen sentiment across different departments
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                                
+                                                <button
+                                                    onClick={() => setNewMessage("What are the most common complaints by location and how can we improve citizen satisfaction?")}
+                                                    className="p-4 text-left border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors group"
+                                                >
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-green-600 dark:text-green-400 text-sm font-medium">📍</span>
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-primary">
+                                                                Location-based Insights
+                                                            </h4>
+                                                            <p className="text-sm text-muted-foreground mt-1">
+                                                                Discover location-specific issues and recommendations for improvement
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 ) : (
                                     messages.map((message) => (
                                         <div
